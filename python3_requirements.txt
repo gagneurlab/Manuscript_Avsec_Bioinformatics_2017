@@ -1,0 +1,4 @@
+numpy
+concise
+tensorflow
+snakemake

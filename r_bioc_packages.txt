@@ -1,0 +1,5 @@
+BiocParallel
+Biostrings
+GenomicRanges
+GenomicFeatures
+rtracklayer

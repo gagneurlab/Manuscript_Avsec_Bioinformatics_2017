@@ -1,0 +1,112 @@
+"""
+Author: Ziga Avsec
+Affiliation: TUM
+Aim: Predict RBP binding sites
+Run: snakemake
+TODO:
+  - write run command for slurm
+"""
+workdir:
+    "../../../"
+
+
+SRC = "Scripts/RBP/Eclip/"
+# ECLIP_MODEL_SCRIPTS, = glob_wildcards("src/r/eclip/predictive_models/{eclip_model_script}.R")
+ECLIP_MODEL_SCRIPTS = ["kmer_glmnet"]
+# RBPS, = glob_wildcards("data/encode/eclip/processed/design_matrix/train/{rbp_name}.csv")
+# RBPS = ["GEMIN5", "NKRF", "SUB1", "UPF1"]  # TODO - read in all rbp's from a csv file
+RBPS = ["UPF1", "PUM2", "DDX3X", "NKRF", "TARDBP", "SUGP2"]
+
+TRAIN_TYPES = ["train", "valid", "test"]
+POSNEG = ["pos", "neg"]
+BASE_DM = "data/encode/eclip/processed/design_matrix/"
+# all scripts
+
+
+# TODO add all rbp_name using wildcard....
+# "data/encode/eclip/processed/design_matrix/model_output/linear_model/{rbp_name}.rds"
+rule all:
+    input:
+        "data/encode/eclip/processed/peak_center-gene_mapping_with_sequence.rds",
+        "data/encode/eclip/processed/design_matrix/meta_info/LARP7.json",
+        expand("data/encode/eclip/processed/design_matrix/predictive_models/{eclip_model_script}/{rbp_name}-{position_type}.rds",
+               eclip_model_script=ECLIP_MODEL_SCRIPTS,
+               position_type=["w_position", "no_position"],
+               rbp_name=RBPS),
+        expand(BASE_DM + "/{train_types}/fasta/{rbp_name}_{posneg}.fa",
+               train_types=TRAIN_TYPES, posneg=POSNEG, rbp_name=RBPS)
+
+# read raw data, clean and generate negative sequences
+rule process_raw_data:
+    input:
+        "data/encode/eclip/raw/metadata.tsv",
+        "/s/genomes/human/hg38/GRCh38.p7/gencode.v25.annotation.gtf.rds",
+        "/s/genomes/human/hg38/GRCh38.p7/GRCh38.p7.genome.fa"
+    output:
+        "data/encode/eclip/processed/protein_peak_overlaps.rds",
+        "data/encode/eclip/processed/peak_center-gene_mapping.rds"
+    script:
+        "0_match_peaks_genes.R"
+
+rule append_sequence:
+    input:
+        "data/encode/eclip/processed/peak_center-gene_mapping.rds",
+        "/s/genomes/human/hg38/GRCh38.p7/GRCh38.p7.genome.fa",
+        SRC + "1_extract_peak_sequence.R"
+    output:
+        "data/encode/eclip/processed/peak_center-gene_mapping_with_sequence.rds"
+    script:
+        "1_extract_peak_sequence.R"
+
+rule create_design_matrix:
+    input:
+        "data/encode/eclip/processed/peak_center-gene_mapping_with_sequence.rds",
+        SRC + "2_create_design_matrix.R"
+    output:
+        # just a single output to not deal with multple ones
+        "data/encode/eclip/processed/design_matrix/meta_info/LARP7.json"
+    script:
+        "2_create_design_matrix.R"
+
+rule generate_fasta:
+    input:
+        BASE_DM + "/meta_info/{rbp_name}.json",
+        expand(BASE_DM + "/{train_types}/{{rbp_name}}.csv", train_types=TRAIN_TYPES),
+        rscript = SRC + "3_generate_fasta_sequences.R"
+    output:
+        # just a single output to not deals with multple ones
+        expand(BASE_DM + "/{train_types}/fasta/{{rbp_name}}_{posneg}.fa",
+               train_types=TRAIN_TYPES, posneg=POSNEG)
+    shell:
+        "{input.rscript} {wildcards.rbp_name}"
+
+rule create_extended_design_matrix:
+    input:
+        expand(BASE_DM + "/{train_types}/{rbp_name}.csv", rbp_name=RBPS, train_types=TRAIN_TYPES),
+        SRC + "4_append_other_positions.R"
+    output:
+        # just a single output to not deal with multple ones
+        expand(BASE_DM + "/{train_types}/{rbp_name}_extended.csv", rbp_name=RBPS, train_types=TRAIN_TYPES),
+    script:
+        "4_append_other_positions.R"
+
+# --------------------------------------------
+# train models
+
+# TODO - do this on SLURM in parallel?
+# TODO - define kmer_glmnet.R script automatically {eclip_predictive_script}
+PROC_DIR = "data/encode/eclip/processed"
+rule train_predictive_models:
+    input:
+        # all files from "data/encode/eclip/processed/design_matrix/meta_info/"
+        # all rbps()
+        "data/encode/eclip/processed/design_matrix/meta_info/{rbp_name}.json",
+        "data/encode/eclip/processed/design_matrix/train/{rbp_name}.csv",
+        "data/encode/eclip/processed/design_matrix/valid/{rbp_name}.csv",
+        "data/encode/eclip/processed/design_matrix/test/{rbp_name}.csv",
+        rscript = SRC + "predictive_models/{eclip_model_script}.R"
+    output:
+        PROC_DIR + "/design_matrix/predictive_models/{eclip_model_script}/{rbp_name}-{position_type}.rds",
+        PROC_DIR + "/predictions/{rbp_name}/{eclip_model_script}-{position_type}.csv"
+    shell:
+        "{input.rscript} {wildcards.rbp_name} {wildcards.position_type}"
