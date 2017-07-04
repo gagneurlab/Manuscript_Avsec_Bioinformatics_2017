@@ -3,9 +3,8 @@
 #' author: Avsec
 #'---
 ## load the data
-get_human_anno <- function(only_regular_chr = TRUE, only_protein_coding = TRUE, version = "hg19") {
-  ## TODO updated file
 
+get_human_anno <- function(only_regular_chr = TRUE, only_protein_coding = TRUE, version = "hg19") {
   ## anno <- import(gff_file)
   if (version == "hg19") {
     rds_gff_file <- "/s/genomes/human/hg19/gencode/gencode.v24lift37.annotation.rds"

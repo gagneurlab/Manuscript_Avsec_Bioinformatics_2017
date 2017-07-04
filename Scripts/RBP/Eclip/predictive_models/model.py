@@ -111,8 +111,6 @@ def pos_affine_relu(pos_length, ext_n_bases, ext_filters, feat_name, ext_pos_kwa
     return inp, x
 
 
-# TODO - add secondary structure
-# structure argument
 def model(train_data,
           activation="relu",
           kernel_size=10,

@@ -11,6 +11,9 @@ options(width=140)
 library(motifp)
 library(cowplot)
 plt_dir <- "./data/plots/Concise/Paper/"
+
+## TODO - get the output dir
+
 dir.create(plt_dir, showWarnings = FALSE)
 #'
 #' ## TODO
@@ -18,11 +21,11 @@ dir.create(plt_dir, showWarnings = FALSE)
 #' - [ ] change color scheme
 #'
 #' ## Plot
-gam_obj <- motifp:::get_gam_splines(seq(0, 100, 0.1), n_bases = 10, spline_order = 3)
+gam_obj <- get_gam_splines(seq(0, 100, 0.1), n_bases = 10, spline_order = 3)
 
 x_ext <- seq(-50, 150, 0.1)
-gam_obj_ext <- motifp:::predict_gam_splines(gam_obj$mgcv_smoothcon_obj,
-                                            x=x_ext, col_names=paste0("spline", 1:10))
+gam_obj_ext <- predict_gam_splines(gam_obj$mgcv_smoothcon_obj,
+                                   x=x_ext, col_names=paste0("spline", 1:10))
 dtm_ext<- data.table(x = x_ext, gam_obj_ext) %>% melt(id.vars ="x")
 dtm_ext[, i := str_replace(variable, "spline", "")]
 dtm_ext[, bi := paste0("b[", i, "](x)")]
@@ -63,18 +66,12 @@ plt <- ggplot(dtm, aes(x = x, y = value, group=bi, color=bi)) +
   ggtitle("P-splines")
 plt
 
-save_plot(file.path(plt_dir, "fig1c.pdf"), plt,
+save_plot_mul(file.path(plt_dir, "fig1c"), c("pdf", "png"), plt,
           ncol = 1, # we're saving a grid plot of 2 columns
           nrow = 1,
           base_height=6,
           base_aspect_ratio = 1.3
           )
 
-save_plot(file.path(plt_dir, "fig1c.png"), plt,
-          ncol = 1, # we're saving a grid plot of 2 columns
-          nrow = 1,
-          base_height=6,
-          base_aspect_ratio = 1.3
-          )
 #+
 a=1

@@ -16,7 +16,7 @@
 
 ## 1. Predictive performance for iDeep
 library(dtplyr)
-DIR_ROOT <- "data/encode/eclip/"
+DIR_ROOT <- "data/eclip/"
 
 ## data format 3.
 get_iClip_metrics <- function() {
@@ -46,18 +46,44 @@ get_iClip_metrics <- function() {
   return(dtim)
 }
 
+## TODO - do the same for eCLIP with 2 features
 
 ## 2. Predictive performance for eClip
-get_eClip_metric <- function(n_cores=4, n_bootstrap=200, cache=TRUE) {
+get_eClip_metric <- function(n_cores=4, n_bootstrap=200, cache=TRUE, which="subset") {
+  ## ugly but ok...
+  if (which == "ext") {
+    cache_file <- "data/eclip/processed/predictions/boostrap_auc_auprc_ext.csv"
+    exp_list <- c("DeepNN_ext",
+                  "DeepNN_scalar_position_ext_gam",
+                  "DeepNN_scalar_position_ext_relu")
+    name_hash <- function(exp) {
+      return(ifelse(exp == "DeepNN_ext", "no_pos", gsub("DeepNN_scalar_position_ext_", "", exp)))
+    }
+    base_from <- "DeepNN_scalar_position_relu"
+    rbp_list <- list.dirs("data/eclip/processed/predictions",
+                          recursive=FALSE, full.names = FALSE)
+  } else if (which == "subset") {
+    cache_file <- "data/eclip/processed/predictions/boostrap_auc_auprc_2.csv"
+    exp_list <- c("DeepNN_2",
+                  "DeepNN_scalar_position_gam_2",
+                  "DeepNN_scalar_position_relu_2")    
+    name_hash <- function(exp) {
+      exp <- gsub("_2", "", exp)
+      return(ifelse(exp == "DeepNN", "no_pos", gsub("DeepNN_scalar_position_", "", exp)))
+    }
+    rbp_list <- c("UPF1", "PUM2", "DDX3X", "NKRF", "TARDBP", "SUGP2")
+  }
+
+
   get_eClip_metric_single <- function(rbp, exp, n_bootstrap = 200) {
     path <- file.path(DIR_ROOT, "/processed/predictions/", rbp, paste0(exp, ".csv"))
     dt <- fread(path)
     dt[, V1 := NULL]
     dt[, subtask := rbp]
     dt[, task := "eClip"]
-    dt[, Method := ifelse(exp == "DeepNN_ext", "no_pos", gsub("DeepNN_scalar_position_ext_", "", exp))]
+    dt[, Method := name_hash(exp)]
 
-    ## TODO boostrap and get the metric
+    ## boostrap and get the metric
     dt <- dt[, bootstrap_metric(y_true, y_pred,
                                 metric_fn = list("auc"= cem_auc,
                                                  "auprc"= cem_auprc),
@@ -69,15 +95,12 @@ get_eClip_metric <- function(n_cores=4, n_bootstrap=200, cache=TRUE) {
                variable.name="metric")
     return(dt)
   }
-  cache_file <- "data/encode/eclip/processed/predictions/boostrap_auc_auprc_ext.csv"
+
   if (cache==TRUE & file.exists(cache_file)) {
     return(fread(cache_file))
   }
-  exp_list <- c("DeepNN_ext",
-                "DeepNN_scalar_position_ext_gam",
-                "DeepNN_scalar_position_ext_relu")
-  rbp_list <- list.dirs("data/encode/eclip/processed/predictions",
-                        recursive=FALSE, full.names = FALSE)
+
+
   dt <- pbmclapply(rbp_list, function(rbp) {
     lapply(exp_list, function(exp)
       get_eClip_metric_single(rbp, exp, n_bootstrap)) %>%

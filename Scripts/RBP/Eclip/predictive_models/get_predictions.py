@@ -13,7 +13,7 @@ def print_exp(exp_name):
 
 
 def get_predictions_method(exp_name, rbp):
-    cache = False
+    cache = True
     data_fn = data.data_extended
     # -----
     c_exp_name = exp_name + "_" + rbp
@@ -51,9 +51,10 @@ def get_predictions_method(exp_name, rbp):
 
 if __name__ == "__main__":
 
-    PROC_DIR = "/s/project/deepcis/encode/eclip/processed"
+    DIR_ROOT = "../../../../data/eclip/"
+    PROC_DIR = DIR_ROOT + "/processed"
 
-    DIR_ROOT = "/s/project/deepcis/encode/eclip/"
+
     RBP_LIST = ["UPF1", "PUM2", "DDX3X", "NKRF", "TARDBP", "SUGP2"]
 
     # all rbp's
@@ -63,16 +64,15 @@ if __name__ == "__main__":
     DB_NAME = "RBP__Eclip"
     HOST = "ouga03"
 
-    # EXPERIMENTS = ["DeepNN",
-    #                "DeepNN_scalar_position_gam",
-    #                "DeepNN_scalar_position_relu",
-    #                "DeepNN_track_position_gam",
-    #                "DeepNN_track_position_relu"]
-    EXPERIMENTS = ["DeepNN_ext",
-                   "DeepNN_scalar_position_ext_gam",
-                   "DeepNN_scalar_position_ext_relu"]
+    EXPERIMENTS = {"DeepNN_ext": RBP_ALL,
+                   "DeepNN_scalar_position_ext_gam": RBP_ALL,
+                   "DeepNN_scalar_position_ext_relu": RBP_ALL,
+                   "DeepNN_2": RBP_LIST,
+                   "DeepNN_scalar_position_gam_2": RBP_LIST,
+                   "DeepNN_scalar_position_relu_2": RBP_LIST,
+                   }
 
     with Parallel(n_jobs=30) as parallel:
         parallel(delayed(get_predictions_method)(exp_name, rbp)
-                 for exp_name in EXPERIMENTS
-                 for rbp in RBP_ALL)
+                 for exp_name, rbps in EXPERIMENTS.items()
+                 for rbp in rbps)

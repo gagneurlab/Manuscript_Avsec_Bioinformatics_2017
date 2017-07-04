@@ -2,3 +2,4 @@ numpy
 concise
 tensorflow
 snakemake
+wbuild

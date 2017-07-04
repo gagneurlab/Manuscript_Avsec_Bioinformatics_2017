@@ -51,8 +51,6 @@ qpl + facet_wrap(~rbp, nrow = 3) + ggtitle("protein-coding genes")
 qpl_all <- tork_plot_iclip(dir_list, gr_genes_all)
 qpl_all + facet_wrap(~rbp, nrow = 3) + ggtitle("all genes")
 
-
-
 ## TODO - fix the bug regarding gene length
 ## TODO - create the mapping between dir and rbp name
 

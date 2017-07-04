@@ -2,11 +2,21 @@
 #' title: Create figure 2
 #' author: Žiga Avsec
 #' wb:
-#'   input: ["data/encode/eclip/processed/predictions/UPF1/kmer_glmnet-no_position.csv"]
+#'   input: ["data/encode/eclip/processed/predictions/UPF1/kmer_glmnet-no_position.csv",
+#'           "data/encode/eclip/processed/predictions/bootstrap_auc.csv",
+#'           "data/encode/eclip/processed/predictions/bootstrap_auprc.csv",
+#'           "data/encode/eclip/processed/predictions/AARS/DeepNN_2.csv",
+#'           "data/encode/eclip/processed/protein_peak_overlaps.rds",
+#'           "data/encode/eclip/processed/peak_center-gene_mapping.rds",
+#'           "data/annotation/gencode.v25.annotation.gtf.rds",
+#'           "data/encode/eclip/processed/design_matrix/train/AARS_extended.csv"
+#'           ]
 #'---
 ##' ## Goal
 ##'
-##' 
+##' ## TODO
+##'
+##' - you need all the scripts and all the RBP's there for eClip
 ##'
 ##' ---------------------------------------------------------------
 ##' 
@@ -25,7 +35,7 @@ plt_dir <- "data/plots/RBP/Eclip/"
 dir.create(plt_dir, showWarnings = FALSE, recursive = TRUE)
 source("Scripts/RBP/Eclip/plot_functions/pr_roc.R")
 source("Scripts/RBP/Eclip/config.R")
-source("Scripts/Concise/Paper/config.R")
+source("Scripts/Figures/config.R")
 
 ## ---------------------------------
 ## color scheme

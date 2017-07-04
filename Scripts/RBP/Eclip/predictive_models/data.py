@@ -25,8 +25,8 @@ def get_pos_ranges(d):
 rbp_name = "UPF1"
 
 
-def data_split(rbp_name, valid_chr=[18, 19, 20, 21, 22, "X"],
-               test_chr=[1, 2, 3]):
+def data_split(rbp_name, valid_chr=[1, 3],
+               test_chr=[2, 4, 6, 8, 10]):
 
     assert len(set(valid_chr).intersection(test_chr)) == 0
     valid_chr = ["chr" + str(i) for i in valid_chr]
@@ -48,40 +48,6 @@ def data_split(rbp_name, valid_chr=[18, 19, 20, 21, 22, "X"],
     dt_train = dt_all[~dt_all.seqnames.isin(valid_chr + test_chr)]
     return dt_train, dt_valid, dt_test
 
-# percentages
-# chr1     0.1280
-# chr19    0.0798
-# chr17    0.0667
-# chr12    0.0618
-# chr16    0.0592
-# chr2     0.0585
-# chr11    0.0576
-# chr6     0.0513
-# chr5     0.0495
-# chr7     0.0490
-# chr3     0.0449
-# chr15    0.0390
-# chr9     0.0357
-# chr22    0.0330
-# chr20    0.0328
-# chrX     0.0316
-# chr10    0.0289
-# chr8     0.0258
-# chr4     0.0209
-# chr14    0.0197
-# chr18    0.0107
-# chr21    0.0090
-# chr13    0.0064
-
-# valid: 1, 3
-# test: 2, 4, 6,
-
-# set1
-# valid_chr=[1,3], test_chr=[2, 4, 6, 8, 10] # 12 (for .25)
-# valid_chr=[2, 3, 4, 5], test_chr=[6, 7, 8, 9, 10] # 11
-# valid_chr=[2, 3, 4], test_chr=[5, 6, 7, 8, 9, 10] # 11 (12 / 24)
-
-
 def calc_perc(data):
     train, valid, test = data
 
@@ -89,8 +55,6 @@ def calc_perc(data):
     n_valid = len(valid)
     n_test = len(test)
     return np.array([n_train, n_valid, n_test]) / (n_train + n_valid + n_test)
-
-# TODO - add the rel output (for relative distances?)
 
 
 POS_FEATURES = ['tss', 'polya', 'exon_intron', 'intron_exon', 'start_codon',
@@ -110,8 +74,8 @@ def sign_log_func_inverse(x):
 def data_extended(rbp_name, n_bases=10,
                   pos_class_weight=1.0,
                   scale="sign_log",  # or "nat"
-                  valid_chr=[18, 19, 20, 21, 22, "X"],
-                  test_chr=[1, 2, 3]):
+                  valid_chr=[1, 3],
+                  test_chr=[2, 4, 6, 8, 10]):
     """
     pos_class_weight: positive class weight
     """
@@ -177,8 +141,8 @@ def data(rbp_name, n_bases=10,
          tss_trunc=2000, polya_trunc=2000,
          pos_as_track=False, kernel_size=10,
          scale_raw=False,
-         valid_chr=[18, 19, 20, 21, 22, "X"],
-         test_chr=[1, 2, 3]):
+         valid_chr=[1, 3],
+         test_chr=[2, 4, 6, 8, 10]):
     """
     pos_class_weight: positive class weight
     """
