@@ -12,7 +12,7 @@ SRC = "Scripts/RBP/Eclip/"
 ECLIP_MODEL_SCRIPTS = ["kmer_glmnet"]
 
 import pandas as pd
-dt = pd.read_table("data/encode/eclip/raw/metadata.tsv")
+dt = pd.read_table("data/eclip/raw/metadata.tsv")
 RBPS = pd.Series([x[0] for x in dt[dt.Assembly == "GRCh38"]["Experiment target"].str.split("-")]).unique()
 assert len(RBPS) == 112
 
