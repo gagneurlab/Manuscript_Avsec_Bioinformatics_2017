@@ -40,6 +40,7 @@ library(Biostrings)
 library(GenomicRanges)
 library(rtracklayer)
 library(GenomicFeatures)
+library(Rsamtools)
 
 library(cowplot)
 library(ggsci)

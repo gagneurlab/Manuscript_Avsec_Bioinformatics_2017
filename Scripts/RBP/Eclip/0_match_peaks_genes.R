@@ -13,12 +13,13 @@ N_TIMES_NEGATIVE <- 4
 SEQUENCE_LENGTH <- 101
 ## ----
 
-message("read in raw data")
-grlist <- read_encode_eclip_bed()
-mdata <- read_encode_eclip_meta()
+message("read anno")
 anno <- get_human_anno(version = "hg38")
 fa <- get_human_fasta(version = "hg38")
 genes <- anno[anno$type == "gene"]
+message("read raw data")
+grlist <- read_encode_eclip_bed()
+mdata <- read_encode_eclip_meta()
 
 ##' ## Merge peaks by samples OR ovelap peaks from the same protein
 message("find consensus peaks")
