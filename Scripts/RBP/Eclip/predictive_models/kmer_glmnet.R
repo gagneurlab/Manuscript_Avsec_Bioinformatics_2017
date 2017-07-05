@@ -41,13 +41,13 @@ if (isTRUE(with_position)) {
   ## TSS
   dt[, TSS_distance := log10(TSS_distance + 1)]
   stopifnot(all(!is.na(dt$TSS_distance)))
-  gs_TSS <- get_gam_splines(dt$TSS_distance, n_bases=N_BASES, add_intercept = FALSE)
+  gs_TSS <- get_gam_splines(dt$TSS_distance, n_bases=N_BASES)
   X_TSS <- gs_TSS$X %>% Matrix(sparse=TRUE)
   colnames(X_TSS) <- paste0("TSS_spline", 1:N_BASES)
   ## polya
   dt[, polya_distance := log10(-polya_distance+1)]
   stopifnot(all(!is.na(dt$polya_distance)))
-  gs_polya <- get_gam_splines(dt$polya_distance, n_bases=N_BASES, add_intercept = FALSE)
+  gs_polya <- get_gam_splines(dt$polya_distance, n_bases=N_BASES)
   X_polya <- gs_polya$X %>% Matrix(sparse=TRUE)
   colnames(X_polya) <- paste0("polya_spline", 1:N_BASES)
 
