@@ -36,7 +36,8 @@ rule process_raw_data:
     input:
         "data/eclip/raw/metadata.tsv",
         "/s/genomes/human/hg38/GRCh38.p7/gencode.v25.annotation.gtf.rds",
-        "/s/genomes/human/hg38/GRCh38.p7/GRCh38.p7.genome.fa"
+        "/s/genomes/human/hg38/GRCh38.p7/GRCh38.p7.genome.fa",
+        SRC + "0_match_peaks_genes.R"
     output:
         "data/eclip/processed/protein_peak_overlaps.rds",
         "data/eclip/processed/peak_center-gene_mapping.rds"
