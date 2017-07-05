@@ -1,5 +1,8 @@
 #!/usr/bin/env python
-"""Train the models
+"""Train and tune hyper-parameters for 6 RBPS and 2 positional features
+
+Author: Ziga Avsec
+Affiliation: TUM
 """
 from hyperopt import fmin, tpe, hp, pyll
 from concise.hyopt import CompileFN, CMongoTrials, test_fn
@@ -31,6 +34,7 @@ from joblib import Parallel, delayed
 # functions
 # ---------
 class RunFN():
+
     def __init__(self, exp_name, fn, hyper_params, max_evals, db_name=DB_NAME):
         self.exp_name = exp_name
         self.fn = fn

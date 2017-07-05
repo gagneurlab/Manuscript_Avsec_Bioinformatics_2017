@@ -40,7 +40,7 @@ dir_list <- list.files(paste0("/s/project/deepcis/encode/eclip/processed/design_
   grep("\\.csv$", ., value=TRUE)
 dir_list <- dir_list[!grepl("extended", dir_list)]
 
-## TODO - find the nearest feature point within the same gene?
+## find the nearest feature point
 
 file <- dir_list[1]
 generate_additional_position_csv <- function(file) {

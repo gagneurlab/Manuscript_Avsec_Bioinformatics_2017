@@ -12,13 +12,10 @@ library(motifp)
 library(cowplot)
 plt_dir <- "./data/plots/Concise/Paper/"
 
-## TODO - get the output dir
+## get the output dir
 
 dir.create(plt_dir, showWarnings = FALSE)
 #'
-#' ## TODO
-#'
-#' - [ ] change color scheme
 #'
 #' ## Plot
 gam_obj <- get_gam_splines(seq(0, 100, 0.1), n_bases = 10, spline_order = 3)
@@ -38,17 +35,19 @@ dtm[, bi := paste0("b[", i, "](x)")]
 
 
 ## get the peak annotations
-dtm_max <- dtm[, .SD[which.max(value)], by = variable]
+
 w <- c(1, 1, 1, 1.5, 1.1, 0.9, 0.9, 1, 1, 1)
+dtm[, value_w := value * w[as.integer(i)]]
 dtm_xy <- data.table(x = gam_obj$x, y = (gam_obj$X %*% w)[,1])
+dtm_max <- dtm[, .SD[which.max(value)], by = variable]
 
 dtm_knots <- data.table(i = 1:length(gam_obj$knots), knot_x= gam_obj$knots)
 
 
-plt <- ggplot(dtm, aes(x = x, y = value, group=bi, color=bi)) +
+plt <- ggplot(dtm, aes(x = x, y = value_w, group=bi, color=bi)) +
   geom_line()+ 
   geom_hline(yintercept = 1, lty="dashed", alpha = 0.4) + 
-  geom_text(aes(x = x + 2.99, y = value + 0.03, label = bi), dtm_max, parse=TRUE) +
+  ## geom_text(aes(x = x + 2.99, y = value + 0.03, label = bi), dtm_max, parse=TRUE) +
   geom_line(aes(x, y, group=NULL, color=NULL), dtm_xy) +
   geom_point(aes(x = knot_x, y = 0, group=NULL, color=NULL), dtm_knots) +
   xlim(-5, 105) + 

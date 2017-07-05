@@ -3,9 +3,8 @@
 #' author: Žiga Avsec
 #' wb:
 #'   input: ["data/encode/eclip/processed/predictions/UPF1/kmer_glmnet-no_position.csv",
-#'           "data/encode/eclip/processed/predictions/bootstrap_auc.csv",
-#'           "data/encode/eclip/processed/predictions/bootstrap_auprc.csv",
-#'           "data/encode/eclip/processed/predictions/AARS/DeepNN_2.csv",
+#'            "data/encode/eclip/processed/predictions/AARS/DeepNN_2.csv",
+#'             # ... all rbps, all methods (RBP_ALL, RBP_LIST)
 #'           "data/encode/eclip/processed/protein_peak_overlaps.rds",
 #'           "data/encode/eclip/processed/peak_center-gene_mapping.rds",
 #'           "data/annotation/gencode.v25.annotation.gtf.rds",
@@ -14,9 +13,6 @@
 #'---
 ##' ## Goal
 ##'
-##' ## TODO
-##'
-##' - you need all the scripts and all the RBP's there for eClip
 ##'
 ##' ---------------------------------------------------------------
 ##' 
@@ -33,57 +29,25 @@ options(width=140)
 ## 
 plt_dir <- "data/plots/RBP/Eclip/"
 dir.create(plt_dir, showWarnings = FALSE, recursive = TRUE)
-source("Scripts/RBP/Eclip/plot_functions/pr_roc.R")
-source("Scripts/RBP/Eclip/config.R")
 source("Scripts/Figures/config.R")
 
 ## ---------------------------------
 ## color scheme
-library(cowplot)
-library(ggsci)
-mypal = pal_locuszoom()(7)
-col_concise_shallow <- mypal[4]
-col_concise_deep <- mypal[5]
-col_relu_shallow <- mypal[3]
-col_relu_deep <- mypal[1]
-col_branchpointer <- mypal[2]
-col_glmnet <- mypal[7]
+cols <- c(col_glmnet, col_branchpointer, col_concise_shallow, col_concise_deep)
 
-
-
-cols1 <- brewer.pal(4,  "RdYlBu")
-cols <- cols1[c(3,4,2,1)]
-## TODO - choose colors 
-## cols <- c(col_glmnet, col_relu_shallow, mypal[2], col_relu_deep)
 rbps <- c("UPF1", "PUM2", "DDX3X", "NKRF", "TARDBP", "SUGP2")
 ## ---------------------------------
-obj <- get_dtb() # dtb_auc, dtb_auprc
-dtb_auc <- obj$dtb_auc
-dtb_auprc <- obj$dtb_auprc
+dtb <- get_dtb_eclip_subset() # dtb_auc, dtb_auprc
 
-## remove relu 
-dtb_auc <- dtb_auc[!grepl("relu", as.character(Method))]
-dtb_auprc <- dtb_auprc[!grepl("relu", as.character(Method))]
-## re-naming
-mname_hash <- c("kmer-glmnet" = "kmer-glmnet",
-                "kmer-glmnet_pos" = "kmer-glmnet_pos",
-                "DeepNN" = "DeepNN",
-                "DeepNN_pos_spline-t" = "DeepNN_pos_spline-t"
-                )
-hash_name <- function(x,h) {
-  fct_relevel(h[as.character(x)], h)
-}
-dtb_auc[, Method := hash_name(Method, mname_hash)]
-dtb_auprc[, Method := hash_name(Method, mname_hash)]
-
-## TODO - put the legend inside the plot
-q_auc <- ggplot(dtb_auc, aes(x = Method, y = auc)) +
+q_auc <- ggplot(dtb[metric == "auc"], aes(x = Method, y = value)) +
   geom_boxplot(aes(color=Method)) +
   geom_jitter(aes(color=Method), alpha=0.1, size=0.5) +
-  scale_color_manual(values=cols) + 
-  geom_signif(comparisons = list(mname_hash[c("DeepNN", "DeepNN_pos_spline-t")],
-                                 mname_hash[c("kmer-glmnet_pos", "DeepNN")], # TODO - in the same line?
-                                 mname_hash[c("kmer-glmnet_pos", "DeepNN_pos_spline-t")]
+  scale_color_manual(labels=c("glmnet", "glmnet w/ rel. distances",
+                              "DNN", "DNN w/ rel. distances"),
+                     values=cols) + 
+  geom_signif(comparisons = list(c("DeepNN", "DeepNN_pos_spline-t"),
+                                 c("kmer-glmnet_pos", "DeepNN"),
+                                 c("kmer-glmnet_pos", "DeepNN_pos_spline-t")
                                  ),
               ## map_signif_level = TRUE,
               ## hjust = 0.9,
@@ -101,7 +65,7 @@ q_auc <- ggplot(dtb_auc, aes(x = Method, y = auc)) +
   theme(legend.justification = c(1, 0), legend.position = c(1, 0), legend.direction = "horizontal") 
 q_auc
 
-q_auprc <- (q_auc + aes(y = auprc) + ylab("Area under Precision-Recall curve")) %+% dtb_auprc
+q_auprc <- (q_auc + ylab("Area under Precision-Recall curve")) %+% dtb[metric == "auprc"]
 
 q_auprc + theme(panel.grid.major.y=element_line("grey50"))
 
@@ -137,7 +101,7 @@ tp <- tp + scale_y_continuous(labels = scales::comma) +  scale_x_continuous(brea
 ## tp <- tp + scale_y_continuous(labels = scientific_10) +  scale_x_continuous(breaks = c(0, 50000), labels = scientific_10)
 tp
 
-# TODO scientific y-axis
+# scientific y-axis
 plt_ab <- plot_grid(tp, q_auprc, ncol=1, labels = c("a", "b"), align="v", rel_heights = c(0.5, 1))
 
 ## --------------------------------------------
@@ -209,15 +173,20 @@ pl_scatter <- function(df1) {
     ## xlim(c(0.68, 1)) +
     ## ylim(c(0.68, 1)) +
     ylab("auPR with spline transformation") +
-    xlab("auPR default model (rel. distance not used)") + 
+    xlab("auPR default model (rel. distances not used)") + 
     legend_top_ver +
     theme(legend.justification = c(1, 0), legend.position = c(1, 0)) 
   qpl1  
 }
-pl_eclip <- pl_scatter(df1[task =="eClip"]) + legend_off + xlab(NULL) + ylab(NULL) + white_facets
-pl_iclip <- pl_scatter(df1[task =="iClip"]) + xlab(NULL) + ylab(NULL)+ white_facets
-xl <- ggdraw()  + cowplot::draw_label("auPR default model (rel.distance not used)")
-yl <- ggdraw()  + cowplot::draw_label("auPR with spline transformation", angle=90)
+pl_eclip <- pl_scatter(df1[task =="eCLIP"]) + legend_off + xlab(NULL) + ylab(NULL) + white_facets
+pl_iclip <- pl_scatter(df1[task =="CLIP"]) +
+  xlim(c(.5, .97)) + 
+  ylim(c(.5, .97)) + 
+  xlab(NULL) +
+  ylab(NULL)+ white_facets
+
+xl <- ggdraw()  + cowplot::draw_label("auPR default model (rel. distances not used)")
+yl <- ggdraw()  + cowplot::draw_label("auPR with rel. distances (spline tr.)", angle=90)
 
 plt_test_perf <- plot_grid(plot_grid(yl, pl_eclip, pl_iclip,
                                      labels= c("c", "", "d"),
@@ -225,8 +194,6 @@ plt_test_perf <- plot_grid(plot_grid(yl, pl_eclip, pl_iclip,
                            xl,
                            rel_heights = c(1, 0.05),
                            ncol=1)
-
-## TODO - Split the Individual scatter-plots into iDeep + eClip model
 
 ## plot_grid(qpl2_auprc, qpl1_auprc)
 
@@ -255,7 +222,7 @@ dir_list <- list.files("data/encode/eclip/processed/design_matrix/train", full.n
   grep("extended.csv$", ., value=TRUE)
 dt_all <- lapply(dir_list, fread) %>% rbindlist
 
-rbp_subset <- df1[task == "eClip" & add_label][order(-from_before,
+rbp_subset <- df1[task == "eCLIP" & add_label][order(-from_before,
                                                      -signif.gam__no_pos,
                                                      no_pos)][, subtask]
 rbp_subset <- c(rbps, rbp_subset[!rbp_subset %in% rbps])

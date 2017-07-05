@@ -45,7 +45,7 @@ tidy_position <- function() {
 
   dt <- rbindlist(list(dtm, dti), fill=TRUE)
   dt[, variable_name := DIST_FEATURES[variable]]
-  dt[, primary := variable %in% c("dist2", "ppt_start", "canon_hit1", "canon_hit2")]
+  dt[, primary := variable %in% c("dist2", "ppt_start")] #, "canon_hit1", "canon_hit2")]
   return(dt)
 }
 

@@ -40,6 +40,7 @@ gam_vs_relu_loss_curves_plot <- function(top_N=10, use_metrics = c("loss"),
   dtm[, is_mean := FALSE]
   dtm_w_mean = rbindlist(list(dtm_mean, dtm), use.names = TRUE, fill = TRUE)
   dtm_w_mean[, tid := ifelse(is.na(tid), 0, tid)]
+  dtm_w_mean[, type := fct_relevel(type, "relu")]
 
   a = ggplot(dtm_w_mean[metric %in% use_metrics &
                           epoch >= min_epoch & epoch < deep_max_epoch &

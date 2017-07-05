@@ -32,6 +32,8 @@ roc_curves[, method_perf := fct_reorder(method_perf, -auROC)]
 pr_curves[, method_perf := fct_reorder(method_perf, -auPR)]
 ## set methods order by performance
 
+roc_curves <- roc_curves[method != "mgcv_gam"]
+pr_curves <- pr_curves[method != "mgcv_gam"]
 
 ## Colors
 cols <- c(col_concise_deep, col_branchpointer,
@@ -65,18 +67,12 @@ plt <- plot_grid(plt_ROC, plt_PR, ncol=1)
 plt
 
 
-save_plot(file.path(plt_dir, "roc_pr.pdf"), plt,
-          ncol = 1, # we're saving a grid plot of 2 columns
-          nrow = 2,
-          base_height=3.5,
+save_plot_mul(file.path(plt_dir, "roc_pr"), c("pdf", "png"), plt,
+              ncol = 1, # we're saving a grid plot of 2 columns
+              nrow = 2,
+              base_height=3.5
           # each individual subplot should have an aspect ratio of 1.3
-          )
-
-save_plot(file.path(plt_dir, "roc_pr.png"), plt,
-          ncol = 1, # we're saving a grid plot of 2 columns
-          nrow = 2,
-          base_height=3.5,
-          )
+              )
 
 y <- 1
 
@@ -86,34 +82,45 @@ dtp_b_auc <- fread(file.path(load_dir, "bootstrap_auc.csv"))
 dtp_b_auprc <- fread(file.path(load_dir, "bootstrap_auprc.csv"))
 
 level_order <- c("glmnet",
-                 "concise_shallow_relu", "concise_shallow",
+                 ## "mgcv_gam",
+                 ## "concise_shallow_relu",
+                 "concise_shallow",
                  "branchpointer",
-                 "concise_deep_relu", "concise_deep")
+                 ## "concise_deep_relu",
+                 "concise_deep")
+## filter
+dtp_b_auc <- dtp_b_auc[method %in% level_order]
+dtp_b_auprc <- dtp_b_auprc[method %in% level_order]
+
+
+## update color- legend
 cols <- c(col_glmnet,
-          col_relu_shallow,
+          ## col_relu_shallow,
           col_concise_shallow,
           col_branchpointer,
-          col_relu_deep,
+          ## col_relu_deep,
           col_concise_deep)
+          ## mypal[7])
 
 dtp_b_auc[, method := fct_relevel(method, level_order)]
 dtp_b_auprc[, method := fct_relevel(method, level_order)]
 
-## TODO - append _gam to concise_shallow
+## append _gam to concise_shallow
 
 dtp_b_auc %>% setnames("method", "Method")
 dtp_b_auprc %>% setnames("method", "Method")
 
-## TODO - use smaller point-size
 q_auc <- ggplot(dtp_b_auc, aes(x = Method, y = auc)) +
   geom_boxplot(aes(color=Method)) + geom_jitter(aes(color=Method), alpha=0.1, size=0.5) +
-  scale_color_manual(values=cols) + 
-  ## TODO - turn off x-labels
-  geom_signif(comparisons = list(c("concise_shallow_relu", "concise_shallow"),
-                                 c("concise_deep_relu", "concise_deep"),
+  scale_color_manual(labels=c("glmnet", "NN w/ ST shallow",
+                              "branchpointer", "NN w/ ST deep"),
+                     values=cols) + 
+  geom_signif(comparisons = list(## c("concise_shallow_relu", "concise_shallow"),
+                                 ## c("concise_deep_relu", "concise_deep"),
                                  c("branchpointer", "concise_deep")
                                  ),
               hjust = 0.8,
+              map_signif_level = TRUE,
               step_increase = 0.07) +
   ylab("Area under ROC curve") + 
   theme(axis.title.x=element_blank(),
@@ -121,28 +128,21 @@ q_auc <- ggplot(dtp_b_auc, aes(x = Method, y = auc)) +
         axis.ticks.x = element_blank())
 q_auprc <- (q_auc + aes(y = auprc) + ylab("Area under Precision-Recall curve")) %+% dtp_b_auprc
 
-## TODO - put method on the top
-lgd <- get_legend(q_auc +  guides(col = guide_legend(ncol=2)))
+## put method on the top
+lgd <- get_legend(q_auc +  legend_top)
 
 plt_boxplot <- plot_grid(plot_grid(q_auc + legend_off, q_auprc + legend_off, align="v"),
-                       lgd, ncol=1, rel_heights=c(1, 0.15))
+                       lgd, ncol=1, rel_heights=c(1, 0.05))
 plt_boxplot
 
-save_plot(file.path(plt_dir, "roc_pr_boxplot.pdf"), plt_boxplot,
+save_plot_mul(file.path(plt_dir, "roc_pr_boxplot"), c("pdf", "png"), plt_boxplot,
           ncol = 2, # we're saving a grid plot of 2 columns
           nrow = 1,
-          base_height=8,
-          base_aspect_ratio = 0.3
+          base_height=3.5,
+          base_aspect_ratio = 0.82
           # each individual subplot should have an aspect ratio of 1.3
           )
-
-save_plot(file.path(plt_dir, "roc_pr_boxplot.png"), plt_boxplot,
-          ncol = 2, # we're saving a grid plot of 2 columns
-          nrow = 1,
-          base_height=5,
-          base_aspect_ratio = 0.6
-          )
-## TODO - add spline functions
+## add spline functions
 ## ------------------------------------------------------------------
 ## Plot 1
 ## requirements
@@ -159,10 +159,12 @@ dtt <- dtt[!(variable == "canon_hit1" & position > 75)]
 dtt <- dtt[!(grepl("canon_hit", variable) & position > 150)]
 dtt <- dtt[!(grepl("canon_hit", variable) & position > 150)]
 dtt <- dtt[!(variable == "dist1" & position > 3000)]
-
+dtt <- dtt[!grepl("relu", method)]
 ## compute outliers
 dtt[, outlier := p > 0.2 & method == "measured"]
 dtt[outlier == TRUE, p := 0.2]
+
+dtt
 
 plm <- ggplot(dtt[method == "measured" & primary],
               aes(position, p, alpha = N, color = outlier)) +
@@ -197,11 +199,11 @@ plt_pos_effect_supp <- plot_grid(plm %+% dtt[method == "measured" & !primary],
 
 
 save_plot(file.path(plt_dir, "pos_effects.pdf"), plt_pos_effect,
-          ncol=4, nrow=1, base_height=3.5, base_aspect_ratio=0.7,
+          ncol=2, nrow=1, base_height=3.5, base_aspect_ratio=0.7,
           dpi=600)
 
 save_plot_mul(file.path(plt_dir, "fig3_sup"), c("pdf", "png", "eps"), plt_pos_effect_supp,
-          ncol=5, nrow=1, base_height=3.5, base_aspect_ratio=0.7,
+          ncol=7, nrow=1, base_height=3.5, base_aspect_ratio=0.7,
           dpi=600)
 
 ## save_plot(file.path(plt_dir, "pos_effects.png"), plt_pos_effect,

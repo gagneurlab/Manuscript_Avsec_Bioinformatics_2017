@@ -45,6 +45,15 @@ mcols(genes_ol) <- mcols(genes_ol)[,c("gene_id", "gene_name",
 
 genes_ol$binding_site <- TRUE
 
+## stats
+
+length(protein_peak_overlaps)
+
+## not mapped to any of the genes:
+1 - uniqueN(subjectHits(ol)) / length(protein_peak_overlaps)
+## [1] 0.1013787
+length(subjectHits(ol))/uniqueN(subjectHits(ol))
+
 ## append generate negative training examples
 ## 0. choose rbp
 ## 1. choose gene
@@ -118,4 +127,3 @@ dt_genes[, polya_distance := ifelse(strand == '+',
 ## write_csv(dt_genes, "data/encode/eclip/processed/peak_center-gene_mapping.csv")
 saveRDS(dt_genes, "data/encode/eclip/processed/peak_center-gene_mapping.rds")
 message("done")
-## TODO - maybe use map_ranges_to_genes ?

@@ -6,8 +6,6 @@ grpeaks <- readRDS("data/encode/eclip/processed/peak_center-gene_mapping_with_se
 
 dtpeaks <- grpeaks %>% as.data.frame %>% as.data.table
 
-## TODO - split data wrt proteins
-## by 
 flog.info("create directory")
 all_rbp <- dtpeaks[, unique(rbp)]
 CORE_DIR <- "data/encode/eclip/processed/design_matrix/"
@@ -30,8 +28,8 @@ pblapply(all_rbp, function(crbp) {
 
   ## split by chromosomes using roughly a 60/20/20 split
   all_seqnames <- dtpeaks[, unique(seqnames)] %>% as.character
-  info$test_chr <- paste0("chr", 1:3)
-  info$valid_chr <- paste0("chr", c(18:22, "X", "Y"))
+  info$valid_chr <- paste0("chr", c(1, 3))
+  info$test_chr <- paste0("chr", c(2, 4, 6, 8, 10))
   info$train_chr <- setdiff(all_seqnames, c(info$test_chr, info$valid_chr))
 
   ## subset the table wrt rows and columns. note the fraction of total

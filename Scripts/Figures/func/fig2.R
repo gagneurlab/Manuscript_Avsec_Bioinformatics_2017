@@ -1,29 +1,14 @@
 ## Idea - for each plot, you need two essential components: data
 ## (returned by some data function and the plot itself)
 
-get_dtb <- function() {
-  fix_names <- function(x) {
-    x %>% str_replace("_2", "") %>% str_replace("scalar_", "") %>% str_replace("position", "pos")
-  }
-  ##+
-  ## deepnn
-  message("Get deepnn model")
-  dtb_auc <- fread("data/encode/eclip/processed/predictions/bootstrap_auc.csv")
-  dtb_auprc <- fread("data/encode/eclip/processed/predictions/bootstrap_auprc.csv")
-  dtb_auc[, V1 := NULL]
-  dtb_auprc[, V1 := NULL]
-  dtb_auc %>% setnames("method", "Method")
-  dtb_auprc %>% setnames("method", "Method")
-  dtb_auc[, Method := fix_names(Method)]
-  dtb_auprc[, Method := fix_names(Method)]
-  dtb_auc[, Method] %>% unique
+source("Scripts/Figures/func/pr_roc.R")
 
-  rbps <- c("UPF1", "PUM2", "DDX3X", "NKRF", "TARDBP", "SUGP2")
-  dtb_auc[, rbp := fct_relevel(rbp, rbps)]
-  dtb_auprc[, rbp := fct_relevel(rbp, rbps)]
-
-  ## glmnet
+get_glmnet <- function(cache=TRUE) {
   message("Get glmnet")
+  cache_file <- "data/eclip/processed/predictions/boostrap_glmnet_auc_auprc.csv"
+  if (cache==TRUE & file.exists(cache_file)) {
+    return(fread(cache_file))
+  }
   dt_pred <- get_predictions()
   dt_pred <- dt_pred[grepl("kmer", method)]
   dt_pred[, method := str_replace(method, "_glmnet", "-glmnet")]
@@ -31,31 +16,47 @@ get_dtb <- function() {
   dt_pred[, method := str_replace(method, "position", "pos")]
   dt_pred[, method := str_replace(method, "-w", "")]
   set.seed(42)
-  message("bootstrap auc")
-  dt_pred_auc <- dt_pred[, .(auc = bootstrap_metric(y_true, y_pred, cem_auc,
-                                                    n_bootstrap=200, return_summary=FALSE)),
-                         by = .(rbp, method)]
-  message("bootstrap auprc")
-  dt_pred_auprc <- dt_pred[, .(auprc = bootstrap_metric(y_true, y_pred, cem_auprc,
-                                                        n_bootstrap=200, return_summary=FALSE)),
-                           by = .(rbp, method)]
-  message("reformat")
-  dt_pred_auc %>% setnames("method", "Method")
-  dt_pred_auprc %>% setnames("method", "Method")
+  message("bootstrap auc & auprc")
+  dtb <- dt_pred[, bootstrap_metric(y_true, y_pred, 
+                                    metric_fn = list("auc"= cem_auc,
+                                                     "auprc"= cem_auprc),
+                                    n_bootstrap=200, return_summary=FALSE),
+                 by = .(rbp, method)]
+  dtb <- melt(dtb, measure.vars=c("auc", "auprc"),
+              variable.name="metric")
+  ## dtb[, task := "eClip_subset"]
+  dtb %>% setnames("method", "Method")
+  if (cache==TRUE) {
+    write_csv(dtb, cache_file)
+  }
+  return(dtb)
+}
 
-  dtb_auc <- rbindlist(list(dt_pred_auc, dtb_auc), use.names=TRUE, fill=TRUE)
-  dtb_auprc <- rbindlist(list(dt_pred_auprc, dtb_auprc), use.names=TRUE, fill=TRUE)
+get_dtb_eclip_subset <- function(cache=TRUE) {
+  ## deepnn
+  dtb_clip <- get_eClip_metric(cache=cache, which="subset")
+  dtb_glmnet <- get_glmnet(cache=cache)
 
-  ## TODO - from here 
-  dtb_auc[, Method] %>% unique
+  dtb_clip %>% setnames("subtask", "rbp")
+  dtb_clip[ ,task := NULL]
 
+  dtb <- rbindlist(list(dtb_clip, dtb_glmnet), use.names=TRUE)
+  message("Get deepnn model")
+  rbps <- c("UPF1", "PUM2", "DDX3X", "NKRF", "TARDBP", "SUGP2")
+  dtb[, rbp := fct_relevel(rbp, rbps)]
 
-  dtb_auc[, Method := fct_relevel(Method, c("kmer-glmnet", "kmer-glmnet_pos"))]
-  dtb_auprc[, Method := fct_relevel(Method, c("kmer-glmnet", "kmer-glmnet_pos"))]
+  dtb <- dtb[!grepl("relu", as.character(Method))]
+  ## re-naming
+  mname_hash <- c("kmer-glmnet" = "kmer-glmnet",
+                  "kmer-glmnet_pos" = "kmer-glmnet_pos",
+                  "no_pos" = "DeepNN",
+                  "gam" = "DeepNN_pos_spline-t"
+                  )
+  hash_name <- function(x,h) {
+    fct_relevel(h[as.character(x)], h)
+  }
+  dtb[, Method := hash_name(Method, mname_hash)]
 
-  ## TODO - rename
-  dtb_auc[, Method := fct_recode(Method, "DeepNN_pos_spline-t"="DeepNN_pos_gam")]
-  dtb_auprc[, Method := fct_recode(Method, "DeepNN_pos_spline-t"="DeepNN_pos_gam")]
   message("Done!")
-  return(list(dtb_auc=dtb_auc, dtb_auprc=dtb_auprc))
+  return(dtb)
 }
