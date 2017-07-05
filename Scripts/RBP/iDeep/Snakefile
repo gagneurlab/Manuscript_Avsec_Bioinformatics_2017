@@ -4,36 +4,34 @@ Affiliation: TUM
 Goal: Train and evaluate the models for iDeep experiment
 Run: snakemake
 """
-workdir:
-    "../../../"
 
 import os
-dtdir = 'Data/RBP/iDeep/clip/'
+dtdir = '../../../Data/RBP/iDeep/clip/'
 RBPS = [i for i in os.listdir(dtdir) if not i.startswith('.')]
-features = [i for i in os.listdir(os.path.join(dtdir, RBPS[0], "5000/test_sample_0/")) if not i.startswith('.')]
+features = [i for i in os.listdir(os.path.join(dtdir, RBPS[0], "5000/test_sample_0/")) if not (i.startswith('.') or i=='positions.bedGraph.gz')]
 
 assert len(RBPS) == 31
-assert len(features) == 9
+assert len(features) == 8
 
 rule evaluate:
     input:
-        expand("Output/RBP/iDeep/iDeep_original/{rbp_name}.csv", rbp_name=RBPS),
-        expand("Output/RBP/iDeep/iDeep_scaler_position_gam/{rbp_name}.csv", rbp_name=RBPS),
-        expand("Output/RBP/iDeep/iDeep_scaler_position_relu/{rbp_name}.csv", rbp_name=RBPS)
+        expand("../../../Output/RBP/iDeep/iDeep_original/{rbp_name}.csv", rbp_name=RBPS),
+        expand("../../../Output/RBP/iDeep/iDeep_scaler_position_gam/{rbp_name}.csv", rbp_name=RBPS),
+        expand("../../../Output/RBP/iDeep/iDeep_scaler_position_relu/{rbp_name}.csv", rbp_name=RBPS)
     output:
-        "Output/RBP/iDeep/iDeep_auc.csv",
-        "Output/RBP/iDeep/iDeep_auprc.csv"
+        "../../../Output/RBP/iDeep/iDeep_auc.csv",
+        "../../../Output/RBP/iDeep/iDeep_auprc.csv"
     script:
         "model_evaluation.py"
 
 
 rule train:
     input:
-        expand("Data/RBP/iDeep/clip/{rbp_name}/5000/test_sample_0/{fea}", rbp_name=RBPS, fea=features),
-        expand("Data/RBP/iDeep/clip/{rbp_name}/5000/training_sample_0/{fea}", rbp_name=RBPS, fea=features)
+        expand("../../../Data/RBP/iDeep/clip/{rbp_name}/5000/test_sample_0/{fea}", rbp_name=RBPS, fea=features),
+        expand("../../../Data/RBP/iDeep/clip/{rbp_name}/5000/training_sample_0/{fea}", rbp_name=RBPS, fea=features)
     output:
-        expand("Output/RBP/iDeep/iDeep_original/{rbp_name}.csv", rbp_name=RBPS),
-        expand("Output/RBP/iDeep/iDeep_scaler_position_gam/{rbp_name}.csv", rbp_name=RBPS),
-        expand("Output/RBP/iDeep/iDeep_scaler_position_relu/{rbp_name}.csv", rbp_name=RBPS)
+        expand("../../../Output/RBP/iDeep/iDeep_original/{rbp_name}.csv", rbp_name=RBPS),
+        expand("../../../Output/RBP/iDeep/iDeep_scaler_position_gam/{rbp_name}.csv", rbp_name=RBPS),
+        expand("../../../Output/RBP/iDeep/iDeep_scaler_position_relu/{rbp_name}.csv", rbp_name=RBPS)
     script:
         "train.py"
