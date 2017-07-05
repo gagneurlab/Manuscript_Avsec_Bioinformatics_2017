@@ -1,3 +1,9 @@
+"""Train the 3 models for iDeep experiment
+
+Author: Mohammadamin Barekatain
+Affiliation: TUM
+"""
+
 from data import data
 from model import model_ideep
 from keras.callbacks import EarlyStopping

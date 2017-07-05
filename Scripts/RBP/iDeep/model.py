@@ -1,3 +1,9 @@
+"""model() returning the keras model
+
+Author: Mohammadamin Barekatain
+Affiliation: TUM
+"""
+
 # Parts of this script has been copied from https://github.com/xypan1232/iDeep
 
 from keras.models import Sequential, model_from_config

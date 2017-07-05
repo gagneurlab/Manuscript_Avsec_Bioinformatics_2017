@@ -1,3 +1,9 @@
+"""data() returning arrays necessary for training and testing
+
+Author: Mohammadamin Barekatain
+Affiliation: TUM
+"""
+
 # Parts of this script has been copied from https://github.com/xypan1232/iDeep
 
 import os

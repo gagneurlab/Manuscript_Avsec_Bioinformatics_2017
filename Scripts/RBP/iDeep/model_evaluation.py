@@ -1,3 +1,9 @@
+"""Compute the performance of the 3 models for each experiment
+
+Author: Mohammadamin Barekatain
+Affiliation: TUM
+"""
+
 import os
 import numpy as np
 import pandas as pd
