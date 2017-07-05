@@ -1,4 +1,4 @@
-"""model() returning the keras model
+"""model_ideep() returning the keras model
 
 Author: Mohammadamin Barekatain
 Affiliation: TUM
