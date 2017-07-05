@@ -30,8 +30,6 @@ rule all:
                eclip_model_script=ECLIP_MODEL_SCRIPTS,
                position_type=["w_position", "no_position"],
                rbp_name=RBPS)
-        # expand(BASE_DM + "/{train_types}/fasta/{rbp_name}_{posneg}.fa",
-        #        train_types=TRAIN_TYPES, posneg=POSNEG, rbp_name=RBPS)
 
 # read raw data, clean and generate negative sequences
 rule process_raw_data:
@@ -61,21 +59,16 @@ rule create_design_matrix:
         SRC + "2_create_design_matrix.R"
     output:
         # just a single output to not deal with multple ones
-        "data/eclip/processed/design_matrix/meta_info/LARP7.json"
+        expand("data/eclip/processed/design_matrix/meta_info/{rbp}.json",
+               rbp=RBPS),
+        expand("data/eclip/processed/design_matrix/meta_info/train/{rbp}.csv",
+               rbp=RBPS),
+        expand("data/eclip/processed/design_matrix/meta_info/valid/{rbp}.csv",
+               rbp=RBPS),
+        expand("data/eclip/processed/design_matrix/meta_info/test/{rbp}.csv",
+               rbp=RBPS)
     script:
         "2_create_design_matrix.R"
-
-rule generate_fasta:
-    input:
-        BASE_DM + "/meta_info/{rbp_name}.json",
-        expand(BASE_DM + "/{train_types}/{{rbp_name}}.csv", train_types=TRAIN_TYPES),
-        rscript = SRC + "3_generate_fasta_sequences.R"
-    output:
-        # just a single output to not deals with multple ones
-        expand(BASE_DM + "/{train_types}/fasta/{{rbp_name}}_{posneg}.fa",
-               train_types=TRAIN_TYPES, posneg=POSNEG)
-    shell:
-        "{input.rscript} {wildcards.rbp_name}"
 
 rule create_extended_design_matrix:
     input:
