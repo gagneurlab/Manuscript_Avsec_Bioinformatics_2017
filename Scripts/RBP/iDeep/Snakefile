@@ -1,7 +1,7 @@
 """
 Author: Mohammadamin Barekatain
 Affiliation: TUM
-Goal: Train and evaluate the models for iDeep experiment
+Goal: Train and evaluate models for the iDeep experiment
 Run: snakemake
 """
 
