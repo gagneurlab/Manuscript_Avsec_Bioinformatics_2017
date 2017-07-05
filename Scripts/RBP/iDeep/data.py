@@ -1,12 +1,14 @@
+# Parts of this script has been copied from https://github.com/xypan1232/iDeep
+
 import os
 import numpy as np
 import gzip
 import random
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, Imputer
 import pandas as pd
-from concise.preprocessing import encodeSplines, encodeDNA
+from concise.preprocessing import encodeSplines
 
-dtdir = '/Users/aminbarekatain/Desktop/IDP/deep-rbp/datasets/clip/'
+dtdir = '../../../Data/RBP/iDeep/clip/'
 
 files = {"X_GO": "matrix_GeneOntology.tab.gz", "X_KMER": "matrix_RNAkmers.tab.gz", "X_RG": "matrix_RegionType.tab.gz",
          "X_CLIP": "matrix_Cobinding.tab.gz", "X_RNA": "matrix_RNAfold.tab.gz", "positions_nat": "positions.csv", "positions_gam": "positions.csv"}
@@ -17,7 +19,6 @@ def read_positions(positions_file):
     dt = pd.read_csv(positions_file)
     positions = dt.as_matrix(dt.columns[:8])
     return np.sign(positions) * np.log10(np.abs(positions) + 1)
-
 
 
 def read_seq(seq_file):
@@ -151,4 +152,3 @@ def data(protein, features, n_bases=32, seed=None):
     X.clear()
     preprocess_data(X_train, X_valid, X_test, n_bases)
     return (X_train, y_train), (X_valid, y_valid), (X_test, y_test)
-
