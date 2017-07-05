@@ -61,11 +61,11 @@ rule create_design_matrix:
         # just a single output to not deal with multple ones
         expand("data/eclip/processed/design_matrix/meta_info/{rbp}.json",
                rbp=RBPS),
-        expand("data/eclip/processed/design_matrix/meta_info/train/{rbp}.csv",
+        expand("data/eclip/processed/design_matrix/train/{rbp}.csv",
                rbp=RBPS),
-        expand("data/eclip/processed/design_matrix/meta_info/valid/{rbp}.csv",
+        expand("data/eclip/processed/design_matrix/valid/{rbp}.csv",
                rbp=RBPS),
-        expand("data/eclip/processed/design_matrix/meta_info/test/{rbp}.csv",
+        expand("data/eclip/processed/design_matrix/test/{rbp}.csv",
                rbp=RBPS)
     script:
         "2_create_design_matrix.R"
