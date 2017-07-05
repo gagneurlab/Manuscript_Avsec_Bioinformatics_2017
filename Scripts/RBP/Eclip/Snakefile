@@ -29,9 +29,9 @@ rule all:
         expand("data/eclip/processed/design_matrix/predictive_models/{eclip_model_script}/{rbp_name}-{position_type}.rds",
                eclip_model_script=ECLIP_MODEL_SCRIPTS,
                position_type=["w_position", "no_position"],
-               rbp_name=RBPS),
-        expand(BASE_DM + "/{train_types}/fasta/{rbp_name}_{posneg}.fa",
-               train_types=TRAIN_TYPES, posneg=POSNEG, rbp_name=RBPS)
+               rbp_name=RBPS)
+        # expand(BASE_DM + "/{train_types}/fasta/{rbp_name}_{posneg}.fa",
+        #        train_types=TRAIN_TYPES, posneg=POSNEG, rbp_name=RBPS)
 
 # read raw data, clean and generate negative sequences
 rule process_raw_data:
