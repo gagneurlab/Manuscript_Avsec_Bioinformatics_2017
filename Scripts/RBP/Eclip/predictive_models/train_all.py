@@ -17,8 +17,10 @@ import model
 def print_exp(exp_name):
     print("-" * 40 + "\nexp_name: " + exp_name)
 
+DIR_ROOT = data.DIR_ROOT
+PROC_DIR = DIR_ROOT + "/processed"
 
-PROC_DIR = "/s/project/deepcis/encode/eclip/processed"
+PROC_DIR = DIR_ROOT + "/processed"
 MAX_EVALS = 20  # 50 - before it was 20
 
 KILL_TIMEOUT = 60 * 20  # 20 minutes

@@ -31,7 +31,7 @@ get_human_anno <- function(only_regular_chr = TRUE, only_protein_coding = TRUE, 
 
 torkler_plot_anno <- get_human_anno(version = "hg38")
 torkler_plot_genes_gr <- torkler_plot_anno[torkler_plot_anno$type == "gene"]
-torkler_plot_protein_peak_overlaps <- readRDS("data/encode/eclip/processed/protein_peak_overlaps.rds")
+torkler_plot_protein_peak_overlaps <- readRDS("data/eclip/processed/protein_peak_overlaps.rds")
 
 top_genes_tork_plot <- function(proteins_of_choice, 
                                 bp_bucket_size = 5* 500, gene_bucket_size = 2* 100, saturate_at = 50,
@@ -39,7 +39,7 @@ top_genes_tork_plot <- function(proteins_of_choice,
                                 cylab="Genes sorted by length",
                                 cxlab="Distance to gene start (nt)") {
   ##' ## Torkler plots
-  protein_peak_overlaps <- readRDS("data/encode/eclip/processed/protein_peak_overlaps.rds")
+  protein_peak_overlaps <- readRDS("data/eclip/processed/protein_peak_overlaps.rds")
   #+
   library(scales)
   

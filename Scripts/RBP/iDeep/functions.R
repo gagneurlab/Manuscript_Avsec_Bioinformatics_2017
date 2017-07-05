@@ -63,7 +63,7 @@ get_position_landmarks <- function(gr) {
 
 dir2rbp <- function(dir) {
   ## TODO - get the file from Amin
-  dt_hash <- fread("data/encode/eclip/processed/predictions/iClip_dir_rbp_mapping.csv")
+  dt_hash <- fread("data/eclip/processed/predictions/iClip_dir_rbp_mapping.csv")
   setkey(dt_hash, "dir")
   return(dt_hash[dir][, rbp])
 }

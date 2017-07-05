@@ -3,7 +3,7 @@
 #'--- 
 
 ##' requires: eclip data with metadata, ...
-##' produces "data/encode/eclip/processed/peak_center-gene_mapping.rds"
+##' produces "data/eclip/processed/peak_center-gene_mapping.rds"
 
 ## config:
 ## ----
@@ -30,7 +30,7 @@ protein_peak_overlaps <- pblapply(grlist_by_protein, intersect_center) %>%
 protein_peak_overlaps$protein <- names(protein_peak_overlaps)
 message("save protein_peak_overlaps")
 saveRDS(protein_peak_overlaps,
-        "data/encode/eclip/processed/protein_peak_overlaps.rds")
+        "data/eclip/processed/protein_peak_overlaps.rds")
 ## save protein_peak_overlaps
 
 ## for each protein - get the peak positions wrt each gene
@@ -124,6 +124,6 @@ dt_genes[, TSS_distance := ifelse(strand == '+',
 dt_genes[, polya_distance := ifelse(strand == '+',
                                     rbp_peak_center - end,
                                     start - rbp_peak_center)]
-## write_csv(dt_genes, "data/encode/eclip/processed/peak_center-gene_mapping.csv")
-saveRDS(dt_genes, "data/encode/eclip/processed/peak_center-gene_mapping.rds")
+## write_csv(dt_genes, "data/eclip/processed/peak_center-gene_mapping.csv")
+saveRDS(dt_genes, "data/eclip/processed/peak_center-gene_mapping.rds")
 message("done")

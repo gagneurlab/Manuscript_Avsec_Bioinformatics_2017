@@ -2,13 +2,13 @@
 #' title: Create figure 2
 #' author: Žiga Avsec
 #' wb:
-#'   input: ["data/encode/eclip/processed/predictions/UPF1/kmer_glmnet-no_position.csv",
-#'            "data/encode/eclip/processed/predictions/AARS/DeepNN_2.csv",
+#'   input: ["data/eclip/processed/predictions/UPF1/kmer_glmnet-no_position.csv",
+#'            "data/eclip/processed/predictions/AARS/DeepNN_2.csv",
 #'             # ... all rbps, all methods (RBP_ALL, RBP_LIST)
-#'           "data/encode/eclip/processed/protein_peak_overlaps.rds",
-#'           "data/encode/eclip/processed/peak_center-gene_mapping.rds",
+#'           "data/eclip/processed/protein_peak_overlaps.rds",
+#'           "data/eclip/processed/peak_center-gene_mapping.rds",
 #'           "data/annotation/gencode.v25.annotation.gtf.rds",
-#'           "data/encode/eclip/processed/design_matrix/train/AARS_extended.csv"
+#'           "data/eclip/processed/design_matrix/train/AARS_extended.csv"
 #'           ]
 #'---
 ##' ## Goal
@@ -218,7 +218,7 @@ save_plot_mul(file.path(overleaf_plt_dir, "fig2"), c("pdf", "png"), fig2,
 ##
 ## 2nd
 
-dir_list <- list.files("data/encode/eclip/processed/design_matrix/train", full.names = T) %>%
+dir_list <- list.files("data/eclip/processed/design_matrix/train", full.names = T) %>%
   grep("extended.csv$", ., value=TRUE)
 dt_all <- lapply(dir_list, fread) %>% rbindlist
 
@@ -255,7 +255,7 @@ save_plot_mul(file.path(overleaf_plt_dir, "fig2_sup2"), c("png", "eps", "pdf"), 
 
 ## --------------------------------------------
 ## 1st
-dt_genes <- readRDS("data/encode/eclip/processed/peak_center-gene_mapping.rds")
+dt_genes <- readRDS("data/eclip/processed/peak_center-gene_mapping.rds")
 dt_t <- dt_genes[, c(t.test(TSS_distance[binding_site == TRUE]/width[binding_site == TRUE],
                             TSS_distance[binding_site == FALSE]/width[binding_site == FALSE]
                             )[c("statistic", "p.value")], "N"= .N), by = rbp] %>%

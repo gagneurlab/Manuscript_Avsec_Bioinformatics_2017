@@ -36,7 +36,7 @@ get_peaks <- function(dt, gr_positions) {
 
 splits <- c("train", "valid", "test")
 
-dir_list <- list.files(paste0("/s/project/deepcis/encode/eclip/processed/design_matrix/", splits), full.names = T) %>%
+dir_list <- list.files(paste0("data/eclip/processed/design_matrix/", splits), full.names = T) %>%
   grep("\\.csv$", ., value=TRUE)
 dir_list <- dir_list[!grepl("extended", dir_list)]
 

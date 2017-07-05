@@ -13,8 +13,9 @@ from sklearn.preprocessing import Imputer
 from tempfile import mkdtemp
 from joblib import Memory
 
-DIR_ROOT = "/s/project/deepcis/encode/eclip/"
-# DIR_ROOT = "/home/avsec/projects-work/deepcis/data/encode/eclip/"
+
+DIR_ROOT = "/s/project/deepcis/encode/eclip/"  # TODO change path
+# DIR_ROOT = "/home/avsec/projects-work/deepcis/data/eclip/"
 CACHE_DIR = DIR_ROOT + "cache/"
 
 memory = Memory(cachedir=CACHE_DIR, verbose=0)

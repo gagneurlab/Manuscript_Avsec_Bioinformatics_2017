@@ -2,13 +2,13 @@
 #' title: Create design_matrix
 #'---
 flog.info("reading info")
-grpeaks <- readRDS("data/encode/eclip/processed/peak_center-gene_mapping_with_sequence.rds")
+grpeaks <- readRDS("data/eclip/processed/peak_center-gene_mapping_with_sequence.rds")
 
 dtpeaks <- grpeaks %>% as.data.frame %>% as.data.table
 
 flog.info("create directory")
 all_rbp <- dtpeaks[, unique(rbp)]
-CORE_DIR <- "data/encode/eclip/processed/design_matrix/"
+CORE_DIR <- "data/eclip/processed/design_matrix/"
 sapply(file.path(CORE_DIR, c("train", "valid", "test", "meta_info")), dir.create, showWarnings = FALSE)
 ## make directory if it doesn't exist
 

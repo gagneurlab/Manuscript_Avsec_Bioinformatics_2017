@@ -25,7 +25,7 @@ get_DNAStringSet <- function(dt) {
 to_fasta <- function(sset, train_type, is_positive, info) {
   posneg <- ifelse(is_positive, "pos", "neg")
 
-  basepath <- file.path("data/encode/eclip/processed/design_matrix/",
+  basepath <- file.path("data/eclip/processed/design_matrix/",
                         train_type, "fasta")
   stopifnot(dirname(basepath) == dirname(info[[paste0("path_", train_type)]]))
   dir.create(basepath, showWarnings = FALSE)

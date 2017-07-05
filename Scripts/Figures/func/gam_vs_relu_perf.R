@@ -20,7 +20,7 @@ DIR_ROOT <- "data/eclip/"
 
 ## data format 3.
 get_iCLIP_metrics <- function() {
-  dti <- fread("data/encode/eclip/processed/predictions/iClip-iDeep_boostrap_Amin_3.csv")
+  dti <- fread("data/eclip/processed/predictions/iClip-iDeep_boostrap_Amin_3.csv")
   dti[, V1 := NULL]
   dti %>% setnames("method", "Method")
   dti[, Method := str_replace(Method, "_scaler", "")]
@@ -29,7 +29,7 @@ get_iCLIP_metrics <- function() {
   dti[, metric := "auc"]
   setnames(dti, "auc", "value")
 
-  dti_auprc<- fread("data/encode/eclip/processed/predictions/iClip-iDeep_boostrap_Amin_auprc_3.csv")
+  dti_auprc<- fread("data/eclip/processed/predictions/iClip-iDeep_boostrap_Amin_auprc_3.csv")
   dti_auprc[, V1 := NULL]
   dti_auprc %>% setnames("method", "Method")
   dti_auprc[, Method := str_replace(Method, "_scaler", "")]
@@ -113,7 +113,7 @@ get_eClip_metric <- function(n_cores=4, n_bootstrap=200, cache=TRUE, which="ext"
   }
   return(dt)
 }
-## write_csv(dte, "data/encode/eclip/processed/predictions/boostrap_auc_auprc_ext.csv")
+## write_csv(dte, "data/eclip/processed/predictions/boostrap_auc_auprc_ext.csv")
 
 ## 3. Predictive performance for branchpoint prediction task 
 get_BP_metric <- function() {
