@@ -5,7 +5,7 @@
 ##' @return List of GRanges
 ##' @author Žiga Avsec
 read_encode_eclip_bed <- function() {
-  datadir <- "./data/encode/eclip/raw"
+  datadir <- "./data/eclip/raw"
   files <- read_encode_eclip_meta()[, File_accession]
   stopifnot(!any(duplicated(files)))
   bfiles <- file.path(datadir, paste0(files, ".bed"))
@@ -25,7 +25,7 @@ read_encode_eclip_bed <- function() {
 ##' @return data.table with metadata about eclip experiments. See also \Code{read_encode_eclip_bed}.
 ##' @author Žiga Avsec
 read_encode_eclip_meta <- function(only_grch38 = TRUE) {
-  datadir <- "./data/encode/eclip/raw"
+  datadir <- "./data/eclip/raw"
   suppressWarnings(mdata <- fread(file.path(datadir, "metadata.tsv")))
   setnames(mdata, make_names(colnames(mdata)) %>% gsub("\\(s\\)", "", .))
   if (isTRUE(only_grch38)) {

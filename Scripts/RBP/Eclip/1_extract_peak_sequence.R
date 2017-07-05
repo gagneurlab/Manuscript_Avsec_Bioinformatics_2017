@@ -2,17 +2,14 @@
 #' title: Extract peak sequence
 #'---
 ## #' wb:
-## #'   input: ["data/encode/eclip/processed/peak_center-gene_mapping.rds"]
-## #'   output: ["data/encode/eclip/processed/peak_center-gene_mapping_with_sequence.rds"]
+## #'   input: ["data/eclip/processed/peak_center-gene_mapping.rds"]
+## #'   output: ["data/eclip/processed/peak_center-gene_mapping_with_sequence.rds"]
 ## #'---
-## requires "data/encode/eclip/processed/peak_center-gene_mapping.rds"
-## produces "data/encode/eclip/processed/peak_center-gene_mapping_with_sequence.rds"
 
 SEQUENCE_LENGTH <- 101
 
-## we can safely assume that RBP binding must happen on the mRNA itself
 flog.info("read the rds data")
-dt_genes <- readRDS("data/encode/eclip/processed/peak_center-gene_mapping.rds")
+dt_genes <- readRDS("data/eclip/processed/peak_center-gene_mapping.rds")
 flog.info("read fasta")
 fa <- get_human_fasta(version = "hg38")
 
@@ -29,6 +26,4 @@ grpeaks <- resize(grpeaks, width = SEQUENCE_LENGTH, fix = "center")
 flog.info("extract sequence")
 grpeaks <- easy_Views(fa, grpeaks, reverse_seq = TRUE) #append sequence
 flog.info("write to disk")
-saveRDS(grpeaks, "data/encode/eclip/processed/peak_center-gene_mapping_with_sequence.rds")
-
-## IDEA: uniformly sample position + check if it overlaps the motif????
+saveRDS(grpeaks, "data/eclip/processed/peak_center-gene_mapping_with_sequence.rds")

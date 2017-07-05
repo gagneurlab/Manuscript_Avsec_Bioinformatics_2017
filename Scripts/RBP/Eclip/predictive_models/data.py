@@ -1,7 +1,11 @@
+"""data() returning arrays necessary for training and testing
+
+Author: Ziga Avsec
+Affiliation: TUM
+"""
 import pandas as pd
 import numpy as np
 from concise.preprocessing import encodeDNA, encodeSplines
-from concise.utils.helper import read_json
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import FunctionTransformer
 from sklearn.pipeline import make_pipeline
@@ -9,8 +13,9 @@ from sklearn.preprocessing import Imputer
 from tempfile import mkdtemp
 from joblib import Memory
 
-DIR_ROOT = "/s/project/deepcis/encode/eclip/"
-# DIR_ROOT = "/home/avsec/projects-work/deepcis/data/encode/eclip/"
+
+DIR_ROOT = "/s/project/deepcis/encode/eclip/"  # TODO change path
+# DIR_ROOT = "/home/avsec/projects-work/deepcis/data/eclip/"
 CACHE_DIR = DIR_ROOT + "cache/"
 
 memory = Memory(cachedir=CACHE_DIR, verbose=0)
@@ -146,9 +151,6 @@ def data(rbp_name, n_bases=10,
     """
     pos_class_weight: positive class weight
     """
-    # info = read_json(DIR_ROOT + "/processed/design_matrix/meta_info/{0}.json".
-    #                  format(rbp_name))
-
     dt_train, dt_valid, dt_test = data_split(rbp_name, valid_chr, test_chr)
 
     # TODO - not working just with dt_train.seq ?!?!?

@@ -44,7 +44,7 @@ pred_csv2dt_pr<- function(file) {
 
 
 get_roc_curves <- function() {
-  BASE_DIR <- "data/encode/eclip/processed/predictions"
+  BASE_DIR <- "data/eclip/processed/predictions"
   rbp_dirlist <- list.dirs(BASE_DIR, recursive = FALSE, full.names=T)
   roc_curves <- lapply(rbp_dirlist, function(dir) {
     rbp <- basename(dir)
@@ -59,7 +59,7 @@ get_roc_curves <- function() {
 
 
 get_pr_curves <- function() {
-  BASE_DIR <- "data/encode/eclip/processed/predictions"
+  BASE_DIR <- "data/eclip/processed/predictions"
   rbp_dirlist <- list.dirs(BASE_DIR, recursive = FALSE, full.names=T)
   pr_curves <- lapply(rbp_dirlist, function(dir) {
     rbp <- basename(dir)
@@ -73,7 +73,7 @@ get_pr_curves <- function() {
 }
 
 get_predictions <- function() {
-  BASE_DIR <- "data/encode/eclip/processed/predictions"
+  BASE_DIR <- "data/eclip/processed/predictions"
   rbp_dirlist <- list.dirs(BASE_DIR, recursive = FALSE, full.names=T)
   pr_curves <- lapply(rbp_dirlist, function(dir) {
     rbp <- basename(dir)

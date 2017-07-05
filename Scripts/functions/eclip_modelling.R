@@ -1,5 +1,5 @@
 eclip_load_modelling_data <- function(rbp_name) {
-  info <<- jsonlite::fromJSON(paste0("data/encode/eclip/processed/design_matrix/meta_info/", rbp_name, ".json"))
+  info <<- jsonlite::fromJSON(paste0("data/eclip/processed/design_matrix/meta_info/", rbp_name, ".json"))
   stopifnot(info$rbp == rbp_name)
   ## train the model
   dt_train <<- fread(info$path_train)
@@ -14,14 +14,14 @@ eclip_load_modelling_data <- function(rbp_name) {
 
 eclip_modelling_get_output_file <- function(script_name, rbp_name,
                                             position_type="no_position") {
-  output_dir <- file.path("data/encode/eclip/processed/design_matrix/predictive_models/", tools::file_path_sans_ext(script_name))
+  output_dir <- file.path("data/eclip/processed/design_matrix/predictive_models/", tools::file_path_sans_ext(script_name))
   output_file <- file.path(output_dir, paste0(rbp_name, "-", position_type, ".rds"))
   return(output_file)
 }
 
 eclip_modelling_get_output_file_csv <- function(script_name, rbp_name,
                                                 subinfo="no_position") {
-  output_dir <- file.path("data/encode/eclip/processed/predictions/", rbp_name)
+  output_dir <- file.path("data/eclip/processed/predictions/", rbp_name)
   dir.create(output_dir, showWarnings = FALSE)
   output_file <- file.path(output_dir,
 			   paste0(tools::file_path_sans_ext(script_name), "-", subinfo, ".csv"))

@@ -19,8 +19,8 @@ library(dtplyr)
 DIR_ROOT <- "data/eclip/"
 
 ## data format 3.
-get_iClip_metrics <- function() {
-  dti <- fread("data/encode/eclip/processed/predictions/iClip-iDeep_boostrap_Amin.csv")
+get_iCLIP_metrics <- function() {
+  dti <- fread("data/eclip/processed/predictions/iClip-iDeep_boostrap_Amin_3.csv")
   dti[, V1 := NULL]
   dti %>% setnames("method", "Method")
   dti[, Method := str_replace(Method, "_scaler", "")]
@@ -29,7 +29,7 @@ get_iClip_metrics <- function() {
   dti[, metric := "auc"]
   setnames(dti, "auc", "value")
 
-  dti_auprc<- fread("data/encode/eclip/processed/predictions/iClip-iDeep_boostrap_Amin_auprc_2.csv")
+  dti_auprc<- fread("data/eclip/processed/predictions/iClip-iDeep_boostrap_Amin_auprc_3.csv")
   dti_auprc[, V1 := NULL]
   dti_auprc %>% setnames("method", "Method")
   dti_auprc[, Method := str_replace(Method, "_scaler", "")]
@@ -39,7 +39,7 @@ get_iClip_metrics <- function() {
   setnames(dti_auprc, "auprc", "value")
   dtim <- rbindlist(list(dti, dti_auprc))
 
-  dtim <- dtim %>% rename(subtask=rbp) %>% mutate(i=NULL, task="iClip")
+  dtim <- dtim %>% rename(subtask=rbp) %>% mutate(i=NULL, task="iCLIP")
   dtim[, Method := gsub("iDeep_pos_", "", Method)]
   dtim[, Method := gsub("iDeep", "no_pos", Method)]
   dtim <- dtim %>% setcolorder_first(c("task", "subtask", "Method", "metric", "value"))
@@ -49,7 +49,7 @@ get_iClip_metrics <- function() {
 ## TODO - do the same for eCLIP with 2 features
 
 ## 2. Predictive performance for eClip
-get_eClip_metric <- function(n_cores=4, n_bootstrap=200, cache=TRUE, which="subset") {
+get_eClip_metric <- function(n_cores=4, n_bootstrap=200, cache=TRUE, which="ext") {
   ## ugly but ok...
   if (which == "ext") {
     cache_file <- "data/eclip/processed/predictions/boostrap_auc_auprc_ext.csv"
@@ -97,7 +97,9 @@ get_eClip_metric <- function(n_cores=4, n_bootstrap=200, cache=TRUE, which="subs
   }
 
   if (cache==TRUE & file.exists(cache_file)) {
-    return(fread(cache_file))
+    dt <- fread(cache_file)
+    dt[, task := gsub("eClip", "eCLIP", task)]
+    return(dt)
   }
 
 
@@ -111,9 +113,9 @@ get_eClip_metric <- function(n_cores=4, n_bootstrap=200, cache=TRUE, which="subs
   }
   return(dt)
 }
-## write_csv(dte, "data/encode/eclip/processed/predictions/boostrap_auc_auprc_ext.csv")
+## write_csv(dte, "data/eclip/processed/predictions/boostrap_auc_auprc_ext.csv")
 
-## 3. Predictive performance for branch-point prediction task 
+## 3. Predictive performance for branchpoint prediction task 
 get_BP_metric <- function() {
   load_dir <- "data/Concise/Splice_branchpoints/processed/pr_roc/"
   dtp_b_auc <- fread(file.path(load_dir, "bootstrap_auc.csv"))
@@ -122,10 +124,10 @@ get_BP_metric <- function() {
   dtp_b_auprc <- dtp_b_auprc %>% setnames("auprc", "value") %>% mutate(metric="auprc")
 
   dtp <- rbindlist(list(dtp_b_auc, dtp_b_auprc))
-  dtp[, task := "branch-point"]
+  dtp[, task := "branchpoint"]
   ## TODO - rename 
 
-  dtp <- dtp[!method %in% c("branchpointer", "glmnet")]
+  dtp <- dtp[grepl("concise", method)]
   dtp[, method := gsub("concise_", "", method)]
 
   dtp <- dtp %>% separate(method, c("subtask", "Method"), sep="_", extra="merge", fill="right")
@@ -138,12 +140,12 @@ get_BP_metric <- function() {
 }
 
 ## data format 1. (not applicable here)
-## y_pred, y_true, method (no_pos, gam, relu), task (eCLip, iClip, BP), subtask (RBP, deepBP)
+## y_pred, y_true, method (no_pos, gam, relu), task (eCLip, iCLIP, BP), subtask (RBP, deepBP)
 
 ## data format:
 ## method, task, subtask, metric (auc, auprc), value (bootstrapped samples)
 get_all_metric <- function() {
-  dt_iclip <- get_iClip_metrics()
+  dt_iclip <- get_iCLIP_metrics()
 
   dt_eclip <- get_eClip_metric(n_cores=7)
 
@@ -167,7 +169,7 @@ get_metric_comparison <- function(signif_threshold=0.05) {
 
   dtct <- dtc[, .(gam = mean(gam), relu=mean(relu), no_pos=mean(no_pos),
                   p.gam__relu = wilcox.test(gam, relu)$p.value,
-                  p.gam__no_pos = if (task == "branch-point") as.numeric(NA) else wilcox.test(gam, no_pos)$p.value
+                  p.gam__no_pos = if (task == "branchpoint") as.numeric(NA) else wilcox.test(gam, no_pos)$p.value
                   ), by = .(task, subtask, metric)]
 
   dtct[, signif.gam__relu := p.adjust(p.gam__relu, method="bonferroni") < signif_threshold]

@@ -3,7 +3,7 @@
 #'--- 
 
 ##' requires: eclip data with metadata, ...
-##' produces "data/encode/eclip/processed/peak_center-gene_mapping.rds"
+##' produces "data/eclip/processed/peak_center-gene_mapping.rds"
 
 ## config:
 ## ----
@@ -13,12 +13,13 @@ N_TIMES_NEGATIVE <- 4
 SEQUENCE_LENGTH <- 101
 ## ----
 
-message("read in raw data")
-grlist <- read_encode_eclip_bed()
-mdata <- read_encode_eclip_meta()
+message("read anno")
 anno <- get_human_anno(version = "hg38")
 fa <- get_human_fasta(version = "hg38")
 genes <- anno[anno$type == "gene"]
+message("read raw data")
+grlist <- read_encode_eclip_bed()
+mdata <- read_encode_eclip_meta()
 
 ##' ## Merge peaks by samples OR ovelap peaks from the same protein
 message("find consensus peaks")
@@ -30,7 +31,7 @@ protein_peak_overlaps <- pblapply(grlist_by_protein, intersect_center) %>%
 protein_peak_overlaps$protein <- names(protein_peak_overlaps)
 message("save protein_peak_overlaps")
 saveRDS(protein_peak_overlaps,
-        "data/encode/eclip/processed/protein_peak_overlaps.rds")
+        "data/eclip/processed/protein_peak_overlaps.rds")
 ## save protein_peak_overlaps
 
 ## for each protein - get the peak positions wrt each gene
@@ -44,6 +45,15 @@ mcols(genes_ol) <- mcols(genes_ol)[,c("gene_id", "gene_name",
                                       "rbp_peak_center", "rbp")]
 
 genes_ol$binding_site <- TRUE
+
+## stats
+
+length(protein_peak_overlaps)
+
+## not mapped to any of the genes:
+1 - uniqueN(subjectHits(ol)) / length(protein_peak_overlaps)
+## [1] 0.1013787
+length(subjectHits(ol))/uniqueN(subjectHits(ol))
 
 ## append generate negative training examples
 ## 0. choose rbp
@@ -115,7 +125,6 @@ dt_genes[, TSS_distance := ifelse(strand == '+',
 dt_genes[, polya_distance := ifelse(strand == '+',
                                     rbp_peak_center - end,
                                     start - rbp_peak_center)]
-## write_csv(dt_genes, "data/encode/eclip/processed/peak_center-gene_mapping.csv")
-saveRDS(dt_genes, "data/encode/eclip/processed/peak_center-gene_mapping.rds")
+## write_csv(dt_genes, "data/eclip/processed/peak_center-gene_mapping.csv")
+saveRDS(dt_genes, "data/eclip/processed/peak_center-gene_mapping.rds")
 message("done")
-## TODO - maybe use map_ranges_to_genes ?

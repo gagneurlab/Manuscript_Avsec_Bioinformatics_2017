@@ -1,4 +1,9 @@
 #!/usr/bin/env python
+"""Retrieve the test-set predictions for the best model from each experiment
+
+Author: Ziga Avsec
+Affiliation: TUM
+"""
 from concise.hyopt import CMongoTrials, get_data
 import numpy as np
 import pandas as pd
@@ -53,7 +58,6 @@ if __name__ == "__main__":
 
     DIR_ROOT = "../../../../data/eclip/"
     PROC_DIR = DIR_ROOT + "/processed"
-
 
     RBP_LIST = ["UPF1", "PUM2", "DDX3X", "NKRF", "TARDBP", "SUGP2"]
 

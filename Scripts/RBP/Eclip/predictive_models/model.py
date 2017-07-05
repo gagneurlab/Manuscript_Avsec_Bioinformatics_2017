@@ -1,4 +1,7 @@
-"""RBP model
+"""model() returning the keras model
+
+Author: Ziga Avsec
+Affiliation: TUM
 """
 import numpy as np
 from keras.optimizers import Adam, SGD
@@ -18,6 +21,7 @@ from concise.optimizers import AdamWithWeightnorm, data_based_init
 from keras.layers.advanced_activations import PReLU
 from copy import deepcopy
 
+
 def get_pool(pooling):
     pooling = deepcopy(pooling)
     pool_type = pooling["pool_type"]
@@ -30,40 +34,6 @@ def get_pool(pooling):
         return [cl.SmoothPositionWeight(**pooling), cl.GlobalSumPooling1D()]
     else:
         raise ValueError("")
-
-
-def model_simple(train_data,
-                 kernel_size=22,
-                 filters=64,
-                 pooling_final={"pool_type": "max",
-                                "pool_size": 4},  # weight pooling also aplicable
-                 activation="relu",
-                 lr=0.001):
-    seq_length = train_data[0]["seq"].shape[1]
-    n_tasks = train_data[1].shape[1]
-
-    # model
-    m = Sequential([
-        cl.ConvDNA(filters=filters,
-                   kernel_size=kernel_size,
-                   activation=activation,
-                   seq_length=seq_length),
-        kl.MaxPooling1D(4),
-        kl.BatchNormalization(axis=1),
-        kl.Conv1D(filters=filters * 2,  # 128
-                  kernel_size=4,
-                  activation=activation),
-        *get_pool(pooling_final),
-        kl.BatchNormalization(),
-        kl.Dropout(0.5),
-        kl.Dense(64, activation=activation),
-        kl.Dropout(0.5),
-        kl.Dense(n_tasks, activation="sigmoid"),
-    ])
-    m.compile(optimizer=Adam(lr=lr),
-              loss="binary_crossentropy",
-              metrics=["acc"],)
-    return m
 
 
 def pos_module(pos_length, ext_n_bases, ext_filters, feat_name, ext_pos_kwargs):
