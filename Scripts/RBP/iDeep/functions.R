@@ -17,9 +17,9 @@
 ## bf <- rtracklayer::import(bed_file_final)
 ## stopifnot(all(anno[, center ] == start(bf)))
 
-get_peak_centers <- function(dir) {
+get_peak_centers <- function(in_fa) {
   library("Biostrings")
-  fa <- readDNAStringSet(file.path(dir, "sequences.fa.gz"))
+  fa <- readDNAStringSet(in_fa)#file.path(dir, "sequences.fa.gz"))
   anno <- names(fa) %>% tstrsplit(",|;") %>% as.data.table
   setnames(anno, c("chr", "strand", "start", "end", "class"))
   anno[, start := as.numeric(start)]
@@ -62,8 +62,7 @@ get_position_landmarks <- function(gr) {
 }
 
 dir2rbp <- function(dir) {
-  ## TODO - get the file from Amin
-  dt_hash <- fread("data/eclip/processed/predictions/iClip_dir_rbp_mapping.csv")
+  dt_hash <- fread("Scripts/RBP/iDeep/proteinnames.txt", sep=" ", header=FALSE, col.names=c("dir", "rbp"))
   setkey(dt_hash, "dir")
   return(dt_hash[dir][, rbp])
 }

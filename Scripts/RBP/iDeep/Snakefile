@@ -1,37 +1,69 @@
 """
-Author: Mohammadamin Barekatain
+Author: Mohammadamin Barekatain, Ziga Avsec
 Affiliation: TUM
 Goal: Train and evaluate models for the iDeep experiment
 Run: snakemake
 """
 
+
 import os
-dtdir = '../../../Data/RBP/iDeep/clip/'
-RBPS = [i for i in os.listdir(dtdir) if not i.startswith('.')]
-features = [i for i in os.listdir(os.path.join(dtdir, RBPS[0], "5000/test_sample_0/")) if not (i.startswith('.') or i=='positions.bedGraph.gz')]
+DATADIR = '../../../Data/RBP/iDeep/'
+RAWDATADIR = DATADIR + '/raw/'
+
+RBPS = [i for i in os.listdir(RAWDATADIR) if not i.startswith('.')]
+
+ideep_features = ['motif_fea.gz',
+                  'matrix_RNAkmers.tab.gz',
+                  'matrix_RNAfold.tab.gz',
+                  'matrix_RegionType.tab.gz',
+                  'matrix_Response.tab.gz',
+                  'matrix_Cobinding.tab.gz',
+                  'sequences.fa.gz']
+features_new = ['positions.csv']
+
+features = ideep_features + features_new
+
+data_folds = ["training", "test"]
 
 assert len(RBPS) == 31
 assert len(features) == 8
 
-rule evaluate:
+#--------------------------------------------
+rule all:
     input:
-        expand("../../../Output/RBP/iDeep/iDeep_original/{rbp_name}.csv", rbp_name=RBPS),
-        expand("../../../Output/RBP/iDeep/iDeep_scaler_position_gam/{rbp_name}.csv", rbp_name=RBPS),
-        expand("../../../Output/RBP/iDeep/iDeep_scaler_position_relu/{rbp_name}.csv", rbp_name=RBPS)
+        # expand(RAWDATADIR + "/{rbp_name}/5000/{df}_sample_0/positions.csv",
+        #        rbp_name=RBPS,
+        #        df=data_folds),
+        DATADIR + "/iDeep_auc.csv",
+        DATADIR + "/iDeep_auprc.csv"
+#--------------------------------------------
+
+rule add_positions_csv:
+    input:
+        fa = RAWDATADIR + "/{rbp_name}/5000/{df}_sample_0/sequences.fa.gz"
     output:
-        "../../../Output/RBP/iDeep/iDeep_auc.csv",
-        "../../../Output/RBP/iDeep/iDeep_auprc.csv"
+        csv = RAWDATADIR + "/{rbp_name}/5000/{df}_sample_0/positions.csv"
     script:
-        "model_evaluation.py"
+        "nearest_refpoints.R"
 
 
 rule train:
     input:
-        expand("../../../Data/RBP/iDeep/clip/{rbp_name}/5000/test_sample_0/{fea}", rbp_name=RBPS, fea=features),
-        expand("../../../Data/RBP/iDeep/clip/{rbp_name}/5000/training_sample_0/{fea}", rbp_name=RBPS, fea=features)
+        expand(RAWDATADIR + "/{rbp_name}/5000/{df}_sample_0/{fea}", rbp_name=RBPS, fea=features, df=data_folds),
     output:
-        expand("../../../Output/RBP/iDeep/iDeep_original/{rbp_name}.csv", rbp_name=RBPS),
-        expand("../../../Output/RBP/iDeep/iDeep_scaler_position_gam/{rbp_name}.csv", rbp_name=RBPS),
-        expand("../../../Output/RBP/iDeep/iDeep_scaler_position_relu/{rbp_name}.csv", rbp_name=RBPS)
+        expand(DATADIR + "/iDeep_original/{rbp_name}.csv", rbp_name=RBPS),
+        expand(DATADIR + "/iDeep_scalar_position_gam/{rbp_name}.csv", rbp_name=RBPS),
+        expand(DATADIR + "/iDeep_scalar_position_relu/{rbp_name}.csv", rbp_name=RBPS)
     script:
         "train.py"
+
+rule evaluate:
+    input:
+        expand(DATADIR + "/iDeep_original/{rbp_name}.csv", rbp_name=RBPS),
+        expand(DATADIR + "/iDeep_scalar_position_gam/{rbp_name}.csv", rbp_name=RBPS),
+        expand(DATADIR + "/iDeep_scalar_position_relu/{rbp_name}.csv", rbp_name=RBPS)
+    output:
+        DATADIR + "/iDeep_auc.csv",
+        DATADIR + "/iDeep_auprc.csv"
+    script:
+        "model_evaluation.py"

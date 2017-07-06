@@ -18,7 +18,8 @@ ideep_positions_gam = os.path.join(outdir, 'iDeep_scaler_position_gam')
 results_type = np.dtype([('protein', np.str_, 128), ('y_true', np.int0, (1000,)), ('y_pred_proba', np.float64, (1000,)), ('auc', np.float64)])
 
 
-def read_protein_name(filename='proteinnames'):
+# I changed 'Mut FUS' to 'Mut-FUS' in the proteinnames.txt so that the delimiter can be ' '
+def read_protein_name(filename='proteinnames.txt'):
     protein_dict = {}
     with open(filename, 'r') as fp:
         for line in fp:
@@ -29,6 +30,7 @@ def read_protein_name(filename='proteinnames'):
             else:
                 protein_dict[key_name] = values[1] + ' ' + values[2][:-1]
     return protein_dict
+
 
 def load_result(path):
     protein_dict = read_protein_name()
@@ -41,16 +43,16 @@ def load_result(path):
         protein = protein_dict[protein]
         results_list.append((protein, dt["y_true"], dt["y_pred_proba"], auc))
     return np.array(results_list, dtype=results_type)
-  
+
 
 def make_all_dt(results_list, method_list, measure, num_samples=200):
-    
+
     def bootstrap(y_true, y_pred, num_samples, measure):
         n = len(y_true)
         idx = np.random.randint(0, n, (num_samples, n))
-        return np.array([measure(y_true[idx[i]], y_pred[idx[i]]) 
-                     for i in range(idx.shape[0])])
-    
+        return np.array([measure(y_true[idx[i]], y_pred[idx[i]])
+                         for i in range(idx.shape[0])])
+
     dt_list = []
     for result, method in zip(results_list, method_list):
         for row in result:
@@ -62,7 +64,7 @@ def make_all_dt(results_list, method_list, measure, num_samples=200):
             elif measure == average_precision_score:
                 dt['auprc'] = bootstrap(row['y_true'], row['y_pred_proba'], num_samples, measure)
             dt_list.append(dt)
-            
+
     return pd.concat(dt_list)
 
 
@@ -76,10 +78,10 @@ ideep_positions_gam = load_result(ideep_positions_gam)
 ideep_positions_gam = np.sort(ideep_positions_gam, order='auc')
 
 
-dtb_auprc = make_all_dt([ideep, ideep_positions_gam, ideep_positions_nat], 
-            ['iDeep', 'iDeep_scaler_position_gam', 'iDeep_scaler_position_relu'], average_precision_score)
+dtb_auprc = make_all_dt([ideep, ideep_positions_gam, ideep_positions_nat],
+                        ['iDeep', 'iDeep_scaler_position_gam', 'iDeep_scaler_position_relu'], average_precision_score)
 dtb_auprc.to_csv(os.path.join(outdir, "iDeep_auprc.csv"))
 
-dtb_auc = make_all_dt([ideep, ideep_positions_gam, ideep_positions_nat], 
-            ['iDeep', 'iDeep_scaler_position_gam', 'iDeep_scaler_position_relu'], roc_auc_score)
+dtb_auc = make_all_dt([ideep, ideep_positions_gam, ideep_positions_nat],
+                      ['iDeep', 'iDeep_scaler_position_gam', 'iDeep_scaler_position_relu'], roc_auc_score)
 dtb_auc.to_csv(os.path.join(outdir, "iDeep_auc.csv"))
