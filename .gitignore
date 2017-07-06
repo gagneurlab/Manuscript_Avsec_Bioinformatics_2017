@@ -22,7 +22,7 @@ _cache
 *.rel
 auto
 .nfs*
-.snakemake
+.snakemake*
 .Rproj.user
 .Rhistory
 .RData

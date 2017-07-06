@@ -16,6 +16,8 @@ dt = pd.read_table("data/eclip/raw/metadata.tsv")
 RBPS = pd.Series([x[0] for x in dt[dt.Assembly == "GRCh38"]["Experiment target"].str.split("-")]).unique()
 assert len(RBPS) == 112
 
+RBP_SUBSET = ["UPF1", "PUM2", "DDX3X", "NKRF", "TARDBP", "SUGP2"]
+
 TRAIN_TYPES = ["train", "valid", "test"]
 POSNEG = ["pos", "neg"]
 BASE_DM = "data/eclip/processed/design_matrix/"
@@ -29,7 +31,7 @@ rule all:
         expand("data/eclip/processed/design_matrix/predictive_models/{eclip_model_script}/{rbp_name}-{position_type}.rds",
                eclip_model_script=ECLIP_MODEL_SCRIPTS,
                position_type=["w_position", "no_position"],
-               rbp_name=RBPS)
+               rbp_name=RBP_SUBSET)
 
 # read raw data, clean and generate negative sequences
 rule process_raw_data:
@@ -59,7 +61,6 @@ rule create_design_matrix:
         "data/eclip/processed/peak_center-gene_mapping_with_sequence.rds",
         SRC + "2_create_design_matrix.R"
     output:
-        # just a single output to not deal with multple ones
         expand("data/eclip/processed/design_matrix/meta_info/{rbp}.json",
                rbp=RBPS),
         expand("data/eclip/processed/design_matrix/train/{rbp}.csv",
@@ -87,8 +88,6 @@ rule create_extended_design_matrix:
 PROC_DIR = "data/eclip/processed"
 rule train_predictive_models:
     input:
-        # all files from "data/eclip/processed/design_matrix/meta_info/"
-        # all rbps()
         "data/eclip/processed/design_matrix/meta_info/{rbp_name}.json",
         "data/eclip/processed/design_matrix/train/{rbp_name}.csv",
         "data/eclip/processed/design_matrix/valid/{rbp_name}.csv",
