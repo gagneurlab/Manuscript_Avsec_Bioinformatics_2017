@@ -29,7 +29,6 @@ x_test <- as(x_test, "sparseMatrix")
 
 library(doMC)
 registerDoMC(cores=5)
-## TODO - do the 5-fold cross validation on the training dataset and determine the optimal alpha and lambda
 fit <- glmnet(x_train, as.integer(y_train == "HC"), family = "binomial", alpha = .5, lambda = 0)
 plot(fit)
 y_test_pred <- predict(fit, x_test)[,1]
