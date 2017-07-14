@@ -17,69 +17,6 @@ KILL_TIMEOUT = 60 * 20  # 20 minutes
 
 DB_NAME = "Concise__Splice_branchpoints"
 # --------------------------------------------
-exp_name = "model1"
-print_exp(exp_name)
-# -----
-fn = CompileFN(DB_NAME, exp_name,
-               data_fn=data.data,
-               model_fn=model.model,
-               add_eval_metrics=["auprc", "auc"],
-               loss_metric="auprc",
-               loss_metric_mode="max",
-               use_tensorboard=True,
-               random_state=42)
-
-def eval_expr(expr):
-    a = np.array([pyll.stochastic.sample(expr) for x in range(100)])
-    return np.unique(a)
-
-
-hyper_params = {
-    "data": {"n_bases": hp.choice("d_n_bases", (10, 20)),
-             "pos_class_weight": hp.uniform("d_pos_class_weights", 1.0, 10.0),
-             "truncate": hp.choice("d_truncate", (False, True)),
-             # **NOTE**: there was a bug at the time I ran tris experiment. We were actually using truncate=False all the time.
-             },
-    "model": {"nonlinearity": hp.choice("m_nonlinearity", [None, "relu"]),
-              "filters": 1,
-              "init_motifs": hp.choice("m_init_motifs", (
-                  None,
-                  {"use_pssm": hp.choice("m_use_pssm", (False, True)), "stddev": 0.1},
-              )),
-              # "init_sd_w": hp.loguniform("m_init_sd_w", np.log(1e-5), np.log(0.5)),
-              "pos_effect": {"l2_smooth": hp.loguniform("m_pos_effect_l2_smooth", np.log(1e-12), np.log(1e-5)),
-                             "l2": hp.loguniform("m_pos_effect_l2", np.log(1e-12), np.log(1e-5)),
-                             "use_bias": hp.choice("m_use_bias", [False, True]),
-                             "merge": hp.choice("m_merge", (
-                                 {"type": "multiply"},
-                                 {"type": "add"},
-                                 {"type": "concatenate",
-                                  "hidden_fc": hp.choice("m_hidden_fc", (
-                                      None,
-                                      {"n_hidden": hp.choice("m_hidden_fc_n_hidden",
-                                                             (5, 10, 20)),
-                                       "dropout_rate": hp.choice("m_use_dropout",
-                                                                 (0, hp.uniform("m_dropout_rate", 0, 0.7))),
-                                       }
-                                  )),
-                                  }
-                             )),
-                             },
-              "use_weightnorm": hp.choice("m_use_weightnorm", (False, True)),
-              "lr": hp.loguniform("m_lr", np.log(1e-4), np.log(1e-2)),
-              },
-    "fit": {"epochs": 150,
-            "patience": 2,
-            "batch_size": 128,
-            }
-}
-
-# test_fn(fn, hyper_params, n_train=1000)
-# trials = CMongoTrials(DB_NAME, exp_name, kill_timeout=30 * 60)
-# best = fmin(fn, hyper_params, trials=trials, algo=tpe.suggest, max_evals=30)
-# print("best_parameters: " + str(best))
-
-# ----------------
 exp_name = "model_deep"
 print_exp(exp_name)
 # -----
@@ -128,59 +65,6 @@ best = fmin(fn, hyper_params, trials=trials, algo=tpe.suggest, max_evals=1000)
 print("best_parameters: " + str(best))
 
 # ----------------
-exp_name = "model_shallow"
-print_exp(exp_name)
-# -----
-fn = CompileFN(DB_NAME, exp_name,
-               data_fn=data.data,
-               model_fn=model.model,
-               add_eval_metrics=["auprc", "auc"],
-               loss_metric="auprc",
-               loss_metric_mode="max",
-               use_tensorboard=False,
-               valid_split=0.2,
-               random_state=100)
-
-hyper_params = {
-    "data": {"n_bases": 10 + 10 * hp.randint("n_bases", 3),
-             "pos_class_weight": 2.0,
-             "truncate": True,
-             },
-    "model": {"nonlinearity": hp.choice("m_nonlin", (None, "relu")),
-              "filters": hp.choice("m_filters", (1, 2)),
-              "init_motifs": hp.choice("m_init_motifs", (
-                  None,
-                  {"use_pssm": hp.choice("m_use_pssm", (False, True)),
-                   "stddev": hp.loguniform("m_stddev", np.log(1e-4), np.log(0.2)),
-                   "n_pwm": 1 + hp.randint("m_n_pwm", 2),
-                   },
-              )),
-              "pos_effect": {"l2_smooth": hp.loguniform("m_pos_effect_l2_smooth",
-                                                        np.log(1e-18),
-                                                        np.log(1e2)),
-                             "l2": hp.loguniform("m_pos_effect_l2",
-                                                 np.log(1e-18),
-                                                 np.log(1e2)),
-                             "use_bias": False,
-                             "merge": hp.choice("m_merge", (
-                                 {"type": "multiply"},
-                                 {"type": "add"},
-                                 {"type": "concatenate", "hidden_fc": None})),
-                             },
-              "lr": hp.loguniform("m_lr", np.log(1e-4), np.log(0.005)),
-              },
-    "fit": {"epochs": 150,
-            "patience": 2,
-            "batch_size": 128,
-            }
-}
-
-# test_fn(fn, hyper_params, n_train=1000)
-trials = CMongoTrials(DB_NAME, exp_name, kill_timeout=30 * 60)
-best = fmin(fn, hyper_params, trials=trials, algo=tpe.suggest, max_evals=200)
-print("best_parameters: " + str(best))
-
-# ----------------
 exp_name = "model_shallow2"
 print_exp(exp_name)
 # -----
@@ -215,52 +99,6 @@ hyper_params = {
                                  {"type": "multiply"},
                                  {"type": "add"},
                                  {"type": "concatenate", "hidden_fc": None})),
-                             },
-              "lr": hp.loguniform("m_lr", np.log(1e-4), np.log(0.005)),
-              },
-    "fit": {"epochs": 150,
-            "patience": 2,
-            "batch_size": 128,
-            }
-}
-
-# test_fn(fn, hyper_params, n_train=1000)
-trials = CMongoTrials(DB_NAME, exp_name, kill_timeout=30 * 60)
-best = fmin(fn, hyper_params, trials=trials, algo=tpe.suggest, max_evals=200)
-print("best_parameters: " + str(best))
-
-# ----------------
-exp_name = "model_shallow_multiply"
-print_exp(exp_name)
-# -----
-fn = CompileFN(DB_NAME, exp_name,
-               data_fn=data.data,
-               model_fn=model.model,
-               add_eval_metrics=["auprc", "auc"],
-               loss_metric="auprc",
-               loss_metric_mode="max",
-               use_tensorboard=False,
-               valid_split=0.2,
-               random_state=100)
-
-hyper_params = {
-    "data": {"n_bases": 10 + 10 * hp.randint("n_bases", 3),
-             "pos_class_weight": 2.0,
-             "truncate": True,
-             },
-    "model": {"nonlinearity": "relu",
-              "filters": 1,
-              "init_motifs": {"use_pssm": hp.choice("m_use_pssm", (False, True)),
-                              "stddev": hp.loguniform("m_stddev", np.log(1e-5), np.log(0.3)),
-                              },
-              "pos_effect": {"l2_smooth": hp.loguniform("m_pos_effect_l2_smooth",
-                                                        np.log(1e-10),
-                                                        np.log(1e2)),
-                             "l2": hp.loguniform("m_pos_effect_l2",
-                                                 np.log(1e-18),
-                                                 np.log(1e2)),
-                             "use_bias": False,
-                             "merge": {"type": "multiply"},
                              },
               "lr": hp.loguniform("m_lr", np.log(1e-4), np.log(0.005)),
               },
@@ -323,59 +161,6 @@ hyper_params = {
 trials = CMongoTrials(DB_NAME, exp_name, kill_timeout=30 * 60)
 best = fmin(fn, hyper_params, trials=trials, algo=tpe.suggest, max_evals=200)
 print("best_parameters: " + str(best))
-# ----------------
-exp_name = "model_deep_position=relu"
-print_exp(exp_name)
-# -----
-fn = CompileFN(DB_NAME, exp_name,
-               data_fn=data.data,
-               model_fn=model.model,
-               add_eval_metrics=["auprc", "auc"],
-               loss_metric="auprc",
-               loss_metric_mode="max",
-               use_tensorboard=False,
-               valid_split=0.2,
-               random_state=100)
-
-hyper_params = {
-    "data": {"pos_class_weight": 2.0,
-             "truncate": False,  # we haven't used truncate either in model_deep_position
-             "encode_splines": False,
-             },
-    "model": {"nonlinearity": "relu",
-              "filters": 15 * 2**hp.randint("filters", 5),
-              "init_motifs": None,
-              "pos_effect": {"type": "relu",
-                             "n_bases": 10 + 10 * hp.randint("n_bases", 3),
-                             "l2": hp.loguniform("m_pos_effect_l2",
-                                                 np.log(1e-18),
-                                                 np.log(1e2)),
-                             "activation": hp.choice("m_pos_activation", (None, "relu")),
-                             "use_bias": False,
-                             "merge": {
-                                 "type": "concatenate",
-                                 "hidden_fc": {"n_hidden": 10 + 30 * hp.randint("n_hidden", 3),
-                                               "activation": "relu",
-                                               "dropout_rate": hp.uniform("m_dropout_rate", 0, 0.6),
-                                               "n_layers": hp.randint("m_n_layers", 4),
-                                               },
-                             },
-                             },
-              "lr": hp.loguniform("m_lr", np.log(1e-4), np.log(0.005)),
-              },
-    "fit": {"epochs": 150,
-            "patience": 4,
-            "batch_size": 128,
-            }
-}
-
-# test_fn(fn, hyper_params, n_train=1000)
-trials = CMongoTrials(DB_NAME, exp_name, kill_timeout=30 * 60)
-best = fmin(fn, hyper_params, trials=trials, algo=tpe.suggest, max_evals=1000)
-print("best_parameters: " + str(best))
-
-# --------------------------------------------
-
 # ----------------
 exp_name = "model_shallow_position=relu_scaled"
 print_exp(exp_name)

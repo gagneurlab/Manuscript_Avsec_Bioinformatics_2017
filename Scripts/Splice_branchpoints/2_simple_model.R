@@ -29,6 +29,10 @@ x_test <- as(x_test, "sparseMatrix")
 
 library(doMC)
 registerDoMC(cores=5)
+fit <- cv.glmnet(x_train, as.integer(y_train == "HC"),
+                 family = "binomial", alpha = .5, nfolds=5)
+plot(fit)
+## lambda=0 if for sure the right choice (large dataset)
 fit <- glmnet(x_train, as.integer(y_train == "HC"), family = "binomial", alpha = .5, lambda = 0)
 plot(fit)
 y_test_pred <- predict(fit, x_test)[,1]

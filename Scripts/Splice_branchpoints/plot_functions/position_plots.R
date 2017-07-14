@@ -24,8 +24,6 @@ tidy_position_measured <- function() {
   setnames(dt, "dist.2", "dist2")
   response <- "is_hc"
 
-  ## TODO - add limits
-
   dtm <- melt(dt, id.vars = response, measure.vars = names(DIST_FEATURES))
   dtm <- dtm[, .(p = mean(is_hc), N = .N), by = .(variable, value)]
   ## dtm[, variable_name := DIST_FEATURES[variable]]
@@ -131,7 +129,6 @@ get_position_plots <- function(show_title=TRUE, aes_str=aes_string(alpha="N")) {
   pl_d2 <- qplot(-dist.2, is_hc ,data = dt_dist2) + aes_str
   pl_d2
   #+
-  ## TODO - have one consistent legend for color/size scale
   no_legend <- theme(legend.position="none")
   yl <- ylab("BP fraction") 
   ym <- ylab("Inferred effect")
@@ -144,7 +141,6 @@ get_position_plots <- function(show_title=TRUE, aes_str=aes_string(alpha="N")) {
     my_ggtitle("Acceptor distance ") +
     no_legend
 
-  ## TODO - 
   m_pl_d2 <- qplot(-x, y, data = dtpos[feature == "dist2"], color = method, geom = 'line') +
     ym + 
     xlab("Acceptor distance") +

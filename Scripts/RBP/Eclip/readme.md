@@ -1,10 +1,3 @@
-# TODO 
-
-- [ ] re-shuffle the provided train, valid and test csv files
-  - [ ] Confirm you are getting exactly the same thing as before...
-- [ ] re-plot everything with new data
-
-
 # Running the whole eCLIP pipeline
 
 Final result of the pipeline are the following files:

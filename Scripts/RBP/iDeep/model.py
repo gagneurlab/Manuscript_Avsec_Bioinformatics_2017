@@ -21,7 +21,8 @@ def model_ideep(train_data, features, seed=None):
 
     def get_cnn_gam(train, num_filters=6):
         print('configure gam network for', train.shape)
-
+        # NOTE: Concise now implements a layer SplineT, which simplifies
+        # the following code significantly.
         ext_n_bases = train.shape[2]
         model = Sequential()
         model.add(LocallyConnected1D(filters=num_filters, kernel_size=1, input_shape=(8, ext_n_bases), activation='relu'))
@@ -52,7 +53,6 @@ def model_ideep(train_data, features, seed=None):
         model.add(Dropout(0.5))
         return model
 
-
     def get_cnn_network():
         print('configure cnn network')
 
@@ -67,7 +67,7 @@ def model_ideep(train_data, features, seed=None):
 
         return model
 
-    fea_num_hidden = {"X_GO": 2048, "X_KMER": 2048, "X_RG": 256, "X_CLIP": (256*3), "X_RNA": 128, "motif": 128, "positions_nat": 64}
+    fea_num_hidden = {"X_GO": 2048, "X_KMER": 2048, "X_RG": 256, "X_CLIP": (256 * 3), "X_RNA": 128, "motif": 128, "positions_nat": 64}
     net_list = []
     for feature in features:
         if feature == "seq":

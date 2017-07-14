@@ -90,6 +90,10 @@ def get_minmax_range(train_x, test_x):
     return train_stats
 
 
+# NOTE: concise now implements a transoformer API - concise.preprocessing.EncodeSplines with methods:
+# .fit
+# .predict
+# and operates on multiple features in a single array. Please use that one instead.
 def encodeSplines_common(x, pos_range, n_bases, spline_order):
     x_processed = {k: fill_nan(encodeSplines(v,
                                              n_bases=n_bases,
@@ -107,11 +111,6 @@ def get_structure(seq_vec, cache_path, cache):
         arr = encodeRNAStructure(seq_vec)
         np.save(cache_path, arr)
         return arr
-
-# TODO - write pre-processor with methods:
-# - __init__
-# - fit
-# - transform
 
 
 def data(n_bases=10, spline_order=3, pos_class_weight=1.0, truncate=True,
@@ -143,8 +142,8 @@ def data(n_bases=10, spline_order=3, pos_class_weight=1.0, truncate=True,
         x_train_pos = {k: truncate_values(k, v) for k, v in x_train_pos.items()}
         x_test_pos = {k: truncate_values(k, v) for k, v in x_test_pos.items()}
 
+    # Ranges computed only on the trainin set
     position_stats = get_minmax_range(x_train_pos, x_train_pos)
-    # position_stats = get_minmax_range(x_train_pos, x_test_pos) # TODO - enable back
 
     minmax_scalers = None
     if encode_splines:
@@ -159,7 +158,6 @@ def data(n_bases=10, spline_order=3, pos_class_weight=1.0, truncate=True,
                                for k, v in x_train_pos_spl.items()}
             x_test_pos_spl = {k: minmax_scalers[k].transform(v.reshape((-1, 1))).reshape(v.shape)
                               for k, v in x_test_pos_spl.items()}
-            
 
     x_train = merge_dicts(x_train_pos_spl, {"seq": x_train_seq, "struct": x_train_struct})
     x_test = merge_dicts(x_test_pos_spl, {"seq": x_test_seq, "struct": x_test_struct})

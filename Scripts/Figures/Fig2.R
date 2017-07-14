@@ -132,7 +132,16 @@ df1[task == "eClip" & subtask =="UPF1"]
 ## > dtm[task == "iClip" & metric == "auc", gam- no_pos] %>% summary
 ##      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
 ## -0.004433  0.007605  0.017141  0.021911  0.029563  0.090431   
+## --------------------------------------------
+## shared RBP's: hnRNPC, Nsun2, PUM2, QKI, SRSF1, TAF15, TIA1, U2AF2
 
+## dtm[task == "eCLIP" & metric == "auprc", .(subtask, signif.gam__no_pos)] %>% print(112)
+## dtm[task == "eCLIP" & metric == "auprc", .(subtask, signif.gam__no_pos)][, table(signif.gam__o_pos)]
+## CLIP not signif: ESWR1, PUM2, SRSF1, TAF15
+
+## 104 / 112 - PUM2, SRSF1, TAF15 are all significant
+## 10/11 for unique CLIP
+## In total: 114 / 123
 in_top <- function(x, n = 20) {
   return(rank(- x) <= n)
 }

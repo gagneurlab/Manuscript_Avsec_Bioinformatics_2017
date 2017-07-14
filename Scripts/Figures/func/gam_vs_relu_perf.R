@@ -49,7 +49,7 @@ get_iCLIP_metrics <- function() {
 ## TODO - do the same for eCLIP with 2 features
 
 ## 2. Predictive performance for eClip
-get_eClip_metric <- function(n_cores=4, n_bootstrap=200, cache=TRUE, which="ext") {
+get_eCLIP_metric <- function(n_cores=4, n_bootstrap=200, cache=TRUE, which="ext") {
   ## ugly but ok...
   if (which == "ext") {
     cache_file <- "data/eclip/processed/predictions/boostrap_auc_auprc_ext.csv"
@@ -75,12 +75,12 @@ get_eClip_metric <- function(n_cores=4, n_bootstrap=200, cache=TRUE, which="ext"
   }
 
 
-  get_eClip_metric_single <- function(rbp, exp, n_bootstrap = 200) {
+  get_eCLIP_metric_single <- function(rbp, exp, n_bootstrap = 200) {
     path <- file.path(DIR_ROOT, "/processed/predictions/", rbp, paste0(exp, ".csv"))
     dt <- fread(path)
     dt[, V1 := NULL]
     dt[, subtask := rbp]
-    dt[, task := "eClip"]
+    dt[, task := "eCLIP"]
     dt[, Method := name_hash(exp)]
 
     ## boostrap and get the metric
@@ -98,14 +98,14 @@ get_eClip_metric <- function(n_cores=4, n_bootstrap=200, cache=TRUE, which="ext"
 
   if (cache==TRUE & file.exists(cache_file)) {
     dt <- fread(cache_file)
-    dt[, task := gsub("eClip", "eCLIP", task)]
+    dt[, task := gsub("eCLIP", "eCLIP", task)]
     return(dt)
   }
 
 
   dt <- pbmclapply(rbp_list, function(rbp) {
     lapply(exp_list, function(exp)
-      get_eClip_metric_single(rbp, exp, n_bootstrap)) %>%
+      get_eCLIP_metric_single(rbp, exp, n_bootstrap)) %>%
       rbindlist
   }, mc.cores=n_cores) %>% rbindlist
   if (cache==TRUE) {
@@ -147,7 +147,7 @@ get_BP_metric <- function() {
 get_all_metric <- function() {
   dt_iclip <- get_iCLIP_metrics()
 
-  dt_eclip <- get_eClip_metric(n_cores=7)
+  dt_eclip <- get_eCLIP_metric(n_cores=7)
 
   dt_bp <- get_BP_metric()
   dt <- rbindlist(list(dt_iclip, dt_eclip, dt_bp))

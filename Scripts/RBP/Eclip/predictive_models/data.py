@@ -117,6 +117,10 @@ def data_extended(rbp_name, n_bases=10,
     test_pos = pd.DataFrame(preproc_pipeline.transform(dt_test[POS_FEATURES]), columns=POS_FEATURES)
 
     def create_feature_dict(dt):
+        # NOTE: concise now implements a transoformer API - concise.preprocessing.EncodeSplines with methods:
+        # .fit
+        # .predict
+        # and operates on multiple features in a single array. Please use that one instead.
         raw_dist = {"raw_dist_" + k: np.array(v)[:, np.newaxis, np.newaxis] for k, v in dt.items()}
         dist = {"dist_" + k: encodeSplines(np.array(v)[:, np.newaxis], start=0, end=1) for k, v in dt.items()}
         return {**raw_dist, **dist}

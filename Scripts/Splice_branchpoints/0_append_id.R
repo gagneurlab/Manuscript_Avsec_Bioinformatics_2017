@@ -13,13 +13,11 @@ dt_raw_test <- fread("data/Concise/Splice_branchpoints/processed/branchpointer/t
 dt_raw[order(new_ID)][, is.sorted(dist.1), by = new_ID]
 dt_raw[, new_ID] %>% head
 dt_raw[, .N, by = new_ID][, table(N)]
-## TODO - how to we see if we are from the same batch?
 
 is.sorted(1:10)
 
 process_dt <- function(dt) {
   message("process dt")
-  ## TODO - make a function
   dt[, V1 := NULL]
   dt <- separate(dt, "new_ID", into = c("chr", "pos", "class"), sep = "_")
   stopifnot(all(dt[, class == set]))
@@ -40,17 +38,16 @@ dt_test <- process_dt(dt_raw_test)
 
 
 
-## TODO - check if things are sorted
+## check if things are sorted
 ## - dist.1
 ## - dist.2
 ## - dist.
 
 
-## TODO - extract the sequences from the fasta file
-## TODO - compare them with the refrences
+## extract the sequences from the fasta file
+## compare them with the refrences
 
 
-## TODO - merge with 
 br_data_path <- "~/github/splice_branchpoints/data/"
 
 chrom=c("chr1","chr2","chr3", "chr4","chr5",
@@ -74,7 +71,7 @@ dt_all <- dt_all[-rm_row]
 dt_all[, transcript_id.1 == transcript_id.2] %>% table
 dt_all[, gene_id.1 == gene_id.2] %>% all
 
-## TODO - why different
+## why different
 ## not all are of length 27
 dt_all[, .N, by = exon_id.2][, table(N)] %>% barplot
 dt_all[, set] %>% table  ## No LC data
@@ -91,30 +88,30 @@ dt_test <- merge(dt_test, dt_metainfo, by = c("chr", "start", "end", "strand", "
                  all.x = TRUE, sort=FALSE)
 message("done!")
 dt[, .N, by = exon_id.2][, table(N)] %>% barplot
-## TODO - order it within exon_id.2 by dist.2
-## TODO - merge with dummy data (exon_id.2 x 10:...)
+## order it within exon_id.2 by dist.2
+## merge with dummy data (exon_id.2 x 10:...)
 
-## TODO - get the start location(s) for each exon_id.2 (dist.2 should be 18)
+## get the start location(s) for each exon_id.2 (dist.2 should be 18)
 ##        - for all the distances, check that they match if you elongate them
 ##           - synthetically create a table with everything except the set and seq_*
 ##           - compare that they are the same
-## TODO - extract the sequence data
-## TODO - compare the extracted sequences 
+## - extract the sequence data
+## - compare the extracted sequences 
 
 ## Final dataset:
 ## chr, start, end, strand, ppt_run_length
 
-## TODO - this ppt_run_length can be different...
+## - this ppt_run_length can be different...
 dt[, .(nl = uniqueN(ppt_run_length)), by = exon_id.2][, nl] %>% table %>% barplot
 
-## TODO - use NA's for all the other values like ppt_run_length etc...
+## - use NA's for all the other values like ppt_run_length etc...
 
-## TODO - can we use NA's in keras
+## - can we use NA's in keras
 
 ## Sort the values
 dt <- dt[order(exon_id.2, dist.2)]
 
 
-## TODO - save the values
+## - save the values
 write_csv(dt, "data/Concise/Splice_branchpoints/processed/branchpointer/train/branchpoint_df_HCN_w_id.csv")
 write_csv(dt_test, "data/Concise/Splice_branchpoints/processed/branchpointer/test/branchpoint_df_HCN_w_id.csv")

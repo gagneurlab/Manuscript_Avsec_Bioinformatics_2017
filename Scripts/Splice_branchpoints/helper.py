@@ -64,7 +64,7 @@ def logit(x):
     return np.log(x / (1 - x))
 
 
-# TODO - put this plot into trials object
+# TODO - put this plot into trials object?
 def plot_history(trials, tid, scores=["loss", "f1", "accuracy"],
                  figsize=(15, 3)):
     """Plot the loss curves"""

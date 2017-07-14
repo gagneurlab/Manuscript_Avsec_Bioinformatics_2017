@@ -18,15 +18,72 @@ from concise.optimizers import AdamWithWeightnorm, data_based_init
 from keras.layers.advanced_activations import PReLU
 
 
+def pos_module(pos_length, ext_n_bases, ext_filters, feat_name, ext_pos_kwargs):
+    """Used position module function, calls pos_spline_trans or pos_affine_relu
+    """
+    if "type" not in ext_pos_kwargs or ext_pos_kwargs["type"] == "gam":
+        return pos_spline_trans(pos_length, ext_n_bases, ext_filters, feat_name, ext_pos_kwargs)
+    elif ext_pos_kwargs["type"] == "relu":
+        return pos_affine_relu(pos_length, ext_n_bases, ext_filters, feat_name, ext_pos_kwargs)
+    else:
+        raise ValueError("pos_type invalid")
+
+
+def pos_spline_trans(pos_length, ext_n_bases, ext_filters, feat_name, pos_effect_kwargs):
+    """Get the spline transformation module
+
+    Returns the input and output node
+    """
+    reg = cr.GAMRegularizer(n_bases=ext_n_bases,
+                            l2_smooth=pos_effect_kwargs["l2_smooth"],
+                            l2=pos_effect_kwargs["l2"])
+    pos_in = cl.InputDNAQuantitySplines(pos_length,  # valid padding from conv
+                                        n_bases=pos_effect_kwargs["n_bases"],
+                                        name=feat_name)
+    pos_out = cl.ConvDNAQuantitySplines(filters=ext_filters,
+                                        kernel_regularizer=reg,
+                                        use_bias=pos_effect_kwargs["use_bias"],
+                                        activation=pos_effect_kwargs.get("activation", None),
+                                        name=feat_name + "_conv"
+                                        )(pos_in)
+    if pos_effect_kwargs["merge"]["type"] == "multiply":
+        pos_out = kl.Lambda(lambda x: 1.0 + x)(pos_out)
+    return pos_in, pos_out
+
+
+def pos_affine_relu(pos_length, ext_n_bases, ext_filters, feat_name, pos_effect_kwargs):
+    """Get the affine+relu transformation module
+
+    Returns the input and output node
+    """
+    pos_in = kl.Input((pos_length, 1), name=feat_name)
+    pos_features = kl.Conv1D(filters=pos_effect_kwargs["n_bases"],
+                             kernel_size=1,
+                             use_bias=True,
+                             activation="relu",
+                             name=feat_name + "_conv_features"
+                             )(pos_in)
+    pos_out = kl.Conv1D(filters=ext_filters,
+                        kernel_size=1,
+                        kernel_regularizer=kr.L1L2(l2=pos_effect_kwargs["l2"]),
+                        use_bias=pos_effect_kwargs["use_bias"],
+                        activation=pos_effect_kwargs.get("activation", None),
+                        name=feat_name + "_conv_combine"
+                        )(pos_features)
+    if pos_effect_kwargs["merge"]["type"] == "multiply":
+        pos_out = kl.Lambda(lambda x: 1.0 + x)(pos_out)
+    return pos_in, pos_out
+
+
 def model(train_data,
-          nonlinearity="relu",  # 'relu' or 'exp' - TODO - PRelu?
+          nonlinearity="relu",
           filters=1,
           init_motifs={"use_pssm": True,
                        "stddev": 0.1,
                        "mean_max_scale": 0.0,
                        },
           # init_sd_w=1e-3,
-          pos_effect={"type": "gam",  # alternative relu - TODO - add activation for relu
+          pos_effect={"type": "gam",
                       "l2_smooth": 1e-5,
                       "l2": 1e-5,
                       "activation": None,
@@ -36,7 +93,7 @@ def model(train_data,
           use_weightnorm=False,
           l1_weights=0,
           l1_motif=0,
-          hidden_fc=None,  # {"n_hidden": 4, activation="PReLU", "l1": 1e-4, "l2": 1e-5, "dropout_rate": 0.5}
+          hidden_fc=None,
           # learning rate
           lr=0.002
           ):
@@ -97,46 +154,18 @@ def model(train_data,
         else:
             raise ValueError("pos_effect[\"merge\"][\"type\"] needs to be from {multiply, concatenate, add}")
 
-        pos_in_layers = []
-        pos_out_layers = []
-        for pos_feat in pos_features:
-            pos_effect_type = pos_effect.get("type", "gam")
-            if pos_effect_type == "gam":
-                pos_effect["n_bases"] = train_data[0]["dist2"].shape[2]
-                pos_in = cl.InputDNAQuantitySplines(n_tasks,  # valid padding from conv
-                                                    n_bases=pos_effect["n_bases"],
-                                                    name=pos_feat)
-                pos_out = cl.ConvDNAQuantitySplines(filters=pos_filters,
-                                                    kernel_regularizer=cr.GAMRegularizer(n_bases=pos_effect["n_bases"],
-                                                                                         l2_smooth=pos_effect["l2_smooth"],
-                                                                                         l2=pos_effect["l2"]),
-                                                    use_bias=pos_effect["use_bias"],
-                                                    activation=pos_effect.get("activation", None),
-                                                    name=pos_feat + "_conv"
-                                                    )(pos_in)
-            elif pos_effect_type == "relu":
-                assert train_data[0]["dist2"].shape[2] == 1
-                pos_in = kl.Input((n_tasks, 1), name=pos_feat)
-                pos_features = kl.Conv1D(filters=pos_effect["n_bases"],
-                                         kernel_size=1,
-                                         use_bias=True,
-                                         activation="relu",
-                                         name=pos_feat + "_conv_features"
-                                         )(pos_in)
-                pos_out = kl.Conv1D(filters=pos_filters,
-                                    kernel_size=1,
-                                    kernel_regularizer=kr.L1L2(l2=pos_effect["l2"]),
-                                    use_bias=pos_effect["use_bias"],
-                                    activation=pos_effect.get("activation", None),
-                                    name=pos_feat + "_conv_combine"
-                                    )(pos_features)
-            else:
-                raise ValueError("pos_effect[\"type\"] is invalid")
-            if pos_effect["merge"]["type"] == "multiply":
-                pos_out = kl.Lambda(lambda x: 1.0 + x)(pos_out)
-            # TODO - implement splines sharing?
-            pos_in_layers.append(pos_in)
-            pos_out_layers.append(pos_out)
+        pos_effect["n_bases"] = pos_effect.get("n_bases") or train_data[0]["dist2"].shape[2]
+
+        # NOTE: Concise now implements a layer SplineT, which simplifies
+        # the following code significantly.
+        pos_inputs, pos_outputs = tuple(zip(*[pos_module(pos_length=n_tasks,
+                                                         ext_n_bases=pos_effect["n_bases"],
+                                                         ext_filters=pos_filters,
+                                                         feat_name=feat_name,
+                                                         ext_pos_kwargs=pos_effect)
+                                              for feat_name in pos_features]))
+        pos_in_layers = list(pos_inputs)
+        pos_out_layers = list(pos_outputs)
 
         # merge the layers
         # ----------------
@@ -149,7 +178,6 @@ def model(train_data,
             activation = PReLU() if act_string == "PReLU" else act_string
             for i in range(hidden_fc["n_layers"]):
                 x = kl.Conv1D(hidden_fc["n_hidden"],
-                              # TODO - maybe use more of a segmentatino taste with kernel_size > 1
                               kernel_size=1,
                               activation="relu",
                               kernel_regularizer=kr.L1L2(l1=hidden_fc.get("l1", 0), l2=hidden_fc.get("l2", 0)))(x)
@@ -166,7 +194,6 @@ def model(train_data,
                                 kernel_regularizer=kr.l1(l1_weights),
                                 activation="sigmoid",
                                 name="Conv1D_final_layer"
-                                # kernel_initializer=ki.RandomNormal(stddev=init_sd_w) # TODO - which initialization?
                                 )(x)
 
     # predictions = kl.Flatten()(predictions)  # remove the last dimention

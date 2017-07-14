@@ -119,6 +119,8 @@ def model(train_data,
 
         ext_filters = external_pos["units"]
 
+        # NOTE: Concise now implements a layer SplineT, which simplifies
+        # the following code significantly.
         pos_inputs, pos_outputs = tuple(zip(*[pos_module(pos_length=pos_length,
                                                          ext_n_bases=ext_n_bases,
                                                          ext_filters=ext_filters,

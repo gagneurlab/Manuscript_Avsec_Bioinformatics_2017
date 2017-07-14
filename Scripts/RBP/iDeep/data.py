@@ -96,11 +96,15 @@ def preprocess_data(X_train, X_valid, X_test, n_bases):
             X_test[key] = np.expand_dims(X_test[key], axis=2)
 
         if key == "positions_gam":
+            # NOTE: concise now implements a transoformer API - concise.preprocessing.EncodeSplines with methods:
+            # .fit
+            # .predict
+            # and operates on multiple features in a single array. Please use that one instead.
             X_train[key] = encodeSplines(X_train[key], n_bases=n_bases, start=0, end=1)
             X_valid[key] = encodeSplines(X_valid[key], n_bases=n_bases, start=0, end=1)
             X_test[key] = encodeSplines(X_test[key], n_bases=n_bases, start=0, end=1)
 
-def split_training_validation(X, y, validation_size = 0.2, shuffle = False):
+def split_training_validation(X, y, validation_size=0.2, shuffle=False):
     """split sampels based on balnace classes"""
 
     num_samples = y.shape[0]
@@ -152,7 +156,7 @@ def data(protein, features, n_bases=32, seed=None):
             X_test[feature] = read_positions(os.path.join(path, 'test_sample_0', files[feature]))
         else:
             X[feature] = np.loadtxt(gzip.open(os.path.join(path, 'training_sample_0', files[feature])), skiprows=1)
-            X_test[feature] =  np.loadtxt(gzip.open(os.path.join(path, 'test_sample_0', files[feature])), skiprows=1)
+            X_test[feature] = np.loadtxt(gzip.open(os.path.join(path, 'test_sample_0', files[feature])), skiprows=1)
 
     X_train, y_train, X_valid, y_valid = split_training_validation(X, y)
     X.clear()

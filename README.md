@@ -1,6 +1,7 @@
 ## Spline transformation paper
 
-Disclaimer: I haven't tested the whole pipeline end-to-end. Hence you might encounter some dependency bugs or so.
+Disclaimer: I'm in the process of porting the code from my research repository and haven't tested the whole pipeline end-to-end.
+
 
 ## Installing requirements
 
@@ -26,3 +27,19 @@ Bioconductor packages
 source("https://bioconductor.org/biocLite.R")
 sapply(readLines("r_bioc_packages.txt"), biocLite)
 ```
+
+
+## General repository organization notes
+
+In each experiment folder, the main files are:
+
+- readme.md - contains further instructions
+- data.py - contains a `data()` function returning a tuple of train and test-set arrays
+- model.py - contains a `model()` function returning a Keras model
+- train.py - runs model training and hyper-parameter optimization
+
+R should be started from the repository root.
+
+## TODO
+
+- specify the precise concise version

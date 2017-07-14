@@ -56,8 +56,8 @@ long_to_wide <- function(dt, genome) {
   dt_comp[, start := if (strand == "-") {fill_incr_na(start)} else {fill_incr_na(start, -1)}, by = .(exon_id.2, strand)]
   dt_comp[, end := if (strand == "-") {fill_incr_na(end)} else {fill_incr_na(end, -1)}, by = .(exon_id.2, strand)]
   dt_comp[, position := end]
-  dt_comp[, start := min(end, na.rm = TRUE), by = exon_id.2] #TODO - wrong...
-  dt_comp[, end := max(end, na.rm = TRUE), by = exon_id.2] #TODO _ wrong
+  dt_comp[, start := min(end, na.rm = TRUE), by = exon_id.2]
+  dt_comp[, end := max(end, na.rm = TRUE), by = exon_id.2]
   ## fix the coordinates
   ## expand by few bases
   dt_comp[, start := start -5]

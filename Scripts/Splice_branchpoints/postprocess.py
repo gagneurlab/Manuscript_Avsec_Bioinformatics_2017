@@ -30,8 +30,6 @@ DB_NAME = "Concise__Splice_branchpoints"
 DATA_DIR = os.path.expanduser("~/projects-work/deepcis/data/")
 EXP_DIR = DATA_DIR + "/Concise/Splice_branchpoints/"
 
-# TODO - maybe implement for a single trial?
-
 HOST = "ouga03"
 
 all_trials_names = [["deep_gam", "model_deep"],
@@ -45,7 +43,6 @@ all_trials_names = [["deep_gam", "model_deep"],
 all_trials = [[k, CMongoTrials(DB_NAME, v, ip=HOST, kill_timeout=30 * 60)]
               for k, v in all_trials_names]
 
-# TODO - how to print nicely the table?
 N_top_tids = 100
 for i, (name, t) in enumerate(all_trials):
     print("name: ", name)
@@ -55,7 +52,6 @@ for i, (name, t) in enumerate(all_trials):
 
 
 N_tids = 1
-# TODO - maybe just run the prediction directly...
 for i, (name, t, attr) in enumerate(tqdm(all_trials)):
     attr["tid_info"] = {}
     print("name: ", name)
@@ -98,20 +94,20 @@ df_hist = pd.concat([trials.train_history(tid).assign(trial=name)
 df_hist.to_csv(EXP_DIR + "/trials/train_history/gam_vs_relu.csv")
 
 
-dl = []
-N_tids = 1
-for name, trials, attr in tqdm(all_trials_sub):
-    print("name: ", name)
-    for i, tid in enumerate(attr["top_tids"][:N_tids]):
-        print(EXP_DIR + "/test_predictions/{0}_{1}.csv".format(name, i))
-        df = pd.read_csv(EXP_DIR + "/test_predictions/{0}_{1}.csv".format(name, i))
-        df["name"] = name
-        dl.append(df)
+# dl = []
+# N_tids = 1
+# for name, trials, attr in tqdm(all_trials_sub):
+#     print("name: ", name)
+#     for i, tid in enumerate(attr["top_tids"][:N_tids]):
+#         print(EXP_DIR + "/test_predictions/{0}_{1}.csv".format(name, i))
+#         df = pd.read_csv(EXP_DIR + "/test_predictions/{0}_{1}.csv".format(name, i))
+#         df["name"] = name
+#         dl.append(df)
 
-df = pd.concat(dl)
+# df = pd.concat(dl)
 
 
-df.groupby("name").apply(lambda a: cem.auc(a.y_true != "NEG", a.y_pred))
-df.groupby("name").apply(lambda a: cem.auprc(a.y_true != "NEG", a.y_pred))
+# df.groupby("name").apply(lambda a: cem.auc(a.y_true != "NEG", a.y_pred))
+# df.groupby("name").apply(lambda a: cem.auprc(a.y_true != "NEG", a.y_pred))
 
 

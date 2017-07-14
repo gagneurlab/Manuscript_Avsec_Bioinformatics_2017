@@ -136,7 +136,6 @@ if __name__ == "__main__":
     # --------------------------------------------
     exp_name = "DeepNN_scalar_position_ext_gam"
     # -----
-    # TODO - choose the number of units used?
 
     c_hyper_params = deepcopy(hyper_params)
     c_hyper_params["model"]["external_pos"] = {"type": "gam",
@@ -160,32 +159,3 @@ if __name__ == "__main__":
                       run_test=RUN_TEST,
                       max_evals=MAX_EVALS,
                       rbp_list=RBP_ALL)
-
-    # # --------------------------------------------
-    # exp_name = "DeepNN_track_position_gam_2"
-    # # -----
-
-    # c_hyper_params = deepcopy(hyper_params)
-    # c_hyper_params["data"]["pos_as_track"] = True
-    # c_hyper_params["model"]["external_pos"] = {"type": "gam",
-    #                                            "scale": "log",
-    #                                            "units": 1}
-    # run_DeepNN_trials(exp_name, fn, c_hyper_params,
-    #                   run_test=RUN_TEST,
-    #                   max_evals=MAX_EVALS,
-    #                   rbp_list=RBP_LIST)
-
-    # # --------------------------------------------
-    # exp_name = "DeepNN_track_position_relu_2"
-    # # -----
-
-    # c_hyper_params = deepcopy(hyper_params)
-    # c_hyper_params["data"]["pos_as_track"] = True
-    # c_hyper_params["model"]["external_pos"] = {"type": "relu",
-    #                                            "scale": "log",
-    #                                            "units": 1}
-
-    # run_DeepNN_trials(exp_name, fn, c_hyper_params,
-    #                   run_test=RUN_TEST,
-    #                   max_evals=MAX_EVALS,
-    #                   rbp_list=RBP_LIST)

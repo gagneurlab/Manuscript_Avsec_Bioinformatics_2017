@@ -65,7 +65,7 @@ dtp[, method := fct_relevel(method, c("glmnet",
                                       "concise_deep_relu", "concise_deep"
                                       ))]
 
-## TODO - bootstrap
+## bootstrap
 set.seed(42)
 dtp_b_auc <- dtp[, bootstrap_measure(y_true=="HC", y_pred,
                                      cem_auc, 200, return_summary=FALSE),

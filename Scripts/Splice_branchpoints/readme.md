@@ -13,11 +13,13 @@ See the following repository:
 
 Start workers and run train.py
 
-# Get predictions
+# Post-process:
 
-<!-- TODO -->
+Run:
+- python postprocess.py
+- python interpret_model.py
+- Rscript 3_bootstrap_predictions.R
 
-python postprocess.py
-python interpret_model.py
+# Plot
 
-# Now you are ready to plot...
+Using `Scripts/Figures/Fig3.R` and `Scripts/Figures/Fig4.R`.
