@@ -34,9 +34,7 @@ HOST = "ouga03"
 
 all_trials_names = [["deep_gam", "model_deep"],
                     ["deep_relu", "model_deep_position=relu_scaled"],
-                    ["deep_dense", "model_deep_position=dense"],
                     ["shallow_gam", "model_shallow2"],
-                    ["shallow_gam_mul", "model_shallow_multiply"],
                     ["shallow_relu", "model_shallow_position=relu_scaled"],
                     ]
 

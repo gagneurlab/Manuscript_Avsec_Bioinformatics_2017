@@ -169,11 +169,3 @@ def data(n_bases=10, spline_order=3, pos_class_weight=1.0, truncate=True,
     sample_weight = np.squeeze(np.where(y_train == 1, pos_class_weight, 1), -1)
     return (x_train, y_train, sample_weight,
             pos_columns, get_branchpoint_pwm_list(), position_stats, minmax_scalers), (x_test, y_test)
-
-
-# ## load and save using deepdish:
-# ## - http://deepdish.io/2014/11/11/python-dictionary-to-hdf5/
-# ## - http://deepdish.readthedocs.io/en/latest/io.html
-# import deepdish as dd
-# dd.io.save(BR_DATA + "/data.h5", data)
-# e = dd.io.load(BR_DATA + "/data.h5")()

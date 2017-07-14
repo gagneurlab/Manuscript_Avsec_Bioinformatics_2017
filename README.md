@@ -1,7 +1,8 @@
 ## Spline transformation paper
 
-Disclaimer: I'm in the process of porting the code from my research repository and haven't tested the whole pipeline end-to-end.
+**Disclaimer:** I'm in the process of porting the code from my research repository and haven't tested the whole pipeline end-to-end.
 
+BioArxiv link here: ....
 
 ## Installing requirements
 
@@ -39,7 +40,3 @@ In each experiment folder, the main files are:
 - train.py - runs model training and hyper-parameter optimization
 
 R should be started from the repository root.
-
-## TODO
-
-- specify the precise concise version
