@@ -1,6 +1,6 @@
 ## Spline transformation paper
 
-**Disclaimer:** I'm in the process of porting the code from my research repository and haven't tested the whole pipeline end-to-end.
+**Disclaimer:** I'm in the process of porting the code from my research repository and haven't tested the whole pipeline end-to-end. I will also provide the intermediary raw files soon.
 
 BioArxiv link here: ....
 

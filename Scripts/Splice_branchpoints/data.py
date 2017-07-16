@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from concise.preprocessing.sequence import pad_sequences, encodeDNA
-from concise.preprocessing.smooth import encodeSplines
+from concise.preprocessing.splines import encodeSplines
 from concise.preprocessing.structure import encodeRNAStructure
 from concise.utils.helper import merge_dicts, read_json, write_json
 from concise.utils.pwm import PWM

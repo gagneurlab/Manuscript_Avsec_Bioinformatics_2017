@@ -93,7 +93,6 @@ dtp_b_auc <- dtp_b_auc[method %in% level_order]
 dtp_b_auprc <- dtp_b_auprc[method %in% level_order]
 
 
-## update color- legend
 cols <- c(col_glmnet,
           ## col_relu_shallow,
           col_concise_shallow,
@@ -105,16 +104,17 @@ cols <- c(col_glmnet,
 dtp_b_auc[, method := fct_relevel(method, level_order)]
 dtp_b_auprc[, method := fct_relevel(method, level_order)]
 
-## append _gam to concise_shallow
 
 dtp_b_auc %>% setnames("method", "Method")
 dtp_b_auprc %>% setnames("method", "Method")
 
+## TODO - use smaller point-size
 q_auc <- ggplot(dtp_b_auc, aes(x = Method, y = auc)) +
   geom_boxplot(aes(color=Method)) + geom_jitter(aes(color=Method), alpha=0.1, size=0.5) +
   scale_color_manual(labels=c("glmnet", "NN w/ ST shallow",
                               "branchpointer", "NN w/ ST deep"),
                      values=cols) + 
+  ## TODO - turn off x-labels
   geom_signif(comparisons = list(## c("concise_shallow_relu", "concise_shallow"),
                                  ## c("concise_deep_relu", "concise_deep"),
                                  c("branchpointer", "concise_deep")
@@ -128,7 +128,7 @@ q_auc <- ggplot(dtp_b_auc, aes(x = Method, y = auc)) +
         axis.ticks.x = element_blank())
 q_auprc <- (q_auc + aes(y = auprc) + ylab("Area under Precision-Recall curve")) %+% dtp_b_auprc
 
-## put method on the top
+## TODO - put method on the top
 lgd <- get_legend(q_auc +  legend_top)
 
 plt_boxplot <- plot_grid(plot_grid(q_auc + legend_off, q_auprc + legend_off, align="v"),
@@ -136,13 +136,12 @@ plt_boxplot <- plot_grid(plot_grid(q_auc + legend_off, q_auprc + legend_off, ali
 plt_boxplot
 
 save_plot_mul(file.path(plt_dir, "roc_pr_boxplot"), c("pdf", "png"), plt_boxplot,
-          ncol = 2, # we're saving a grid plot of 2 columns
-          nrow = 1,
-          base_height=3.5,
-          base_aspect_ratio = 0.82
-          # each individual subplot should have an aspect ratio of 1.3
-          )
-## add spline functions
+              ncol = 2, # we're saving a grid plot of 2 columns
+              nrow = 1,
+              base_height=3.5,
+              base_aspect_ratio = 0.82
+              # each individual subplot should have an aspect ratio of 1.3
+              )
 ## ------------------------------------------------------------------
 ## Plot 1
 ## requirements
@@ -154,56 +153,120 @@ col_scheme_shallow <- scale_colour_manual(values = c(col_concise_shallow,
 
 dtt <- tidy_position()
 
-## restrict regions
-dtt <- dtt[!(variable == "canon_hit1" & position > 75)]
-dtt <- dtt[!(grepl("canon_hit", variable) & position > 150)]
-dtt <- dtt[!(grepl("canon_hit", variable) & position > 150)]
-dtt <- dtt[!(variable == "dist1" & position > 3000)]
-dtt <- dtt[!grepl("relu", method)]
-## compute outliers
-dtt[, outlier := p > 0.2 & method == "measured"]
-dtt[outlier == TRUE, p := 0.2]
+## TODO - update this part -
+## - add position
+## - add motif
 
-dtt
+## --------------------------------------------
+## Motif plots
+basedir = "data/Concise/Splice_branchpoints/interpret/sequence/shallow_spline_trans"
+df <- lapply(list.files(basedir, full.names=TRUE), function(f) {
+  dt <- fread(f, header=FALSE)
+  dt[, method := gsub("\\.txt", "", gsub("pwm_", "", basename(f)))]
+  return(dt)
+}) %>% rbindlist
+DNA <- c("A", "C", "G", "T")
+setnames(df, c(DNA, "method"))
 
-plm <- ggplot(dtt[method == "measured" & primary],
-              aes(position, p, alpha = N, color = outlier)) +
-  ## geom_hline(yintercept = 0.05, lty="dashed", alpha = 0.2) + 
-  geom_point() +
-  scale_colour_manual(values=c("black", "red")) + 
-  facet_grid(~variable_name, scales = "free") +
-  legend_off +
-  xlab(NULL) +
-  ylab("Marginal effect") +
+library(ggseqlogo)
+pwm_list = list("Branchpoint-centered PWM (Data)" = t(as.matrix(df[method == "data"][, DNA, with = F])),
+                "Inferred PWM" = t(as.matrix(df[method == "model_transformed"][, DNA, with = F])),
+                "Filter weights" = t(as.matrix(df[method == "model_raw"][, DNA, with = F])))
+
+## TODO - get background probabilty
+background <- c(0.2053,  0.254 ,  0.2001,  0.3407)
+## TODO - create one model_raw_pwm
+mpwm <- exp(pwm_list[["Filter weights"]]) * background
+## normalize
+pwm_list[["Model PWM (Inferred)"]] <- t(t(mpwm) / colSums(mpwm))
+
+pl_raw <- ggseqlogo(pwm_list[3], method='custom', seq_type='dna') + ylab("Weight size")
+pl_raw_pwm <- ggseqlogo(pwm_list[4], seq_type='dna')
+
+pl2 <- ggseqlogo(pwm_list[c(4, 1)], seq_type='dna')
+pl2
+
+pl <- ggseqlogo(pwm_list[c(1)])
+## pl2 <- ggseqlogo(pwm_list[c(2)], method="probability")
+## pl1 <- ggseqlogo(pwm_list[c(1)], method="probability")
+## pl_out <- plot_grid(pl_raw, pl2, pl1, nrow=1)
+pl_out <- cowplot::plot_grid(pl_raw_pwm, pl, nrow=1, rel_widths = c(1,1))
+pl_out
+
+save_plot(file.path(plt_dir, "motif.pdf"), pl_out,
+          ncol = 2, base_height=1.5, base_aspect_ratio=2)
+
+save_plot(file.path(plt_dir, "motif2.pdf"), pl2,
+          ncol = 2, base_height=1.6, base_aspect_ratio=1.6)
+
+ggseqlogo(t(as.matrix(df[method == "data"][, DNA, with = F])))
+## --------------------------------------------
+basedir = "data/Concise/Splice_branchpoints/interpret/positions/shallow_spline_trans"
+dtpos_all<- fread(file.path(basedir, "all_positions.csv"))
+setnames(dtpos_all, "outlier", "Outlier")
+dtpos_all[, primary := feature %in% c("dist2", "ppt_start", "canon_hit1", "canon_hit2")]
+dtpos_all[,V1 := NULL]
+dtpos_all[,V2 := NULL]
+dtpos_all[,V3 := NULL]
+
+## TODO - add variable name 
+dtpos_all[, feature_name := DIST_FEATURES[feature]]
+dtpos_all[type =="measured", Frac := N/sum(N), by = feature]
+
+dtpos_all[, feature_name := fct_relevel(feature_name, DIST_FEATURES[c("dist2", "ppt_start")])]
+
+library(plyr)
+
+plm <- ggplot(dtpos_all[primary == TRUE],
+       aes(x = x, y=y, alpha = Frac)) + 
+  geom_point(aes(group=1, color = "Data"),
+             data= function(x)  x[type == "measured" & !Outlier]) + 
+  geom_point(#aes(group=1, color = "Outlier"),
+             color = "red",
+             ## guide="none",
+             guide=FALSE,
+             data= function(x)  x[type == "measured" & Outlier]) + 
+  geom_line(aes(group=1, color = "Inferred"),
+            data= function(x)  x[type == "inferred"],
+            size=1, alpha=1, show_guide = TRUE) + 
+  geom_line(aes(group=1, color = "Predicted"),
+            data=function(x)  x[type == "predicted"],
+            size=1, alpha=.3) +
+  scale_color_manual(values=c("black", col_concise_shallow, "blue"),
+                     breaks=c("Data", "Inferred", "Predicted"),
+                     name=NULL,
+                     guide = guide_legend(order=1,
+                                          override.aes = list(
+                       linetype = c(rep("blank", 1), "solid", "solid"),
+                       shape = c(rep(16, 1), NA, NA)))) + 
+  scale_alpha_continuous(guide=guide_legend(override.aes = list(linetype="blank",
+                                                                shape=16,
+                                                                color="black")))+
+  ylab("Branchpoint log-odds") + 
+  xlab(NULL) + 
+  facet_wrap(~feature_name, ncol=2, scales="free_x") + 
+  theme_cowplot() + 
+  theme(## legend.justification = c(1, 0),
+        ## legend.position = c(1, 0),
+        legend.position = "bottom",
+        legend.direction = "horizontal",
+        legend.box = "horizontal") + 
+ ## theme(legend.position = "bottom") +
   theme(strip.background = element_rect(colour="white", fill="white")) # remove tabs from facets
-
-pli <- ggplot(dtt[method != "measured" & primary],
-              aes(position, p, color = method)) +
-  ## geom_hline(yintercept = 0.5, lty="dashed", alpha = 0.2)+
-  geom_line() +
-  facet_grid(~variable_name, scales = "free") +
-  col_scheme_shallow + 
-  legend_off +
-  theme(strip.text.x = element_blank(),
-        strip.background = element_blank()) +
-  xlab("Distance") +
-  ylab("Inferred effect") 
+plm
 
 ## main figure - position
-plt_pos_effect <- plot_grid(plm, pli, ncol=1, align="v")
 
 ## supplementary figure - position
-plt_pos_effect_supp <- plot_grid(plm %+% dtt[method == "measured" & !primary],
-                                 pli %+% dtt[method != "measured" & !primary],
-                                 ncol=1, align="v")
+plt_pos_effect_supp <- (plm + facet_wrap(~feature_name, ncol=3, scales="free_x")) %+%
+  dtpos_all[primary==FALSE]
 
-
-save_plot(file.path(plt_dir, "pos_effects.pdf"), plt_pos_effect,
-          ncol=2, nrow=1, base_height=3.5, base_aspect_ratio=0.7,
+save_plot(file.path(plt_dir, "pos_effects.pdf"), plm,
+          ncol=2, nrow=2, base_height=2, base_aspect_ratio=1.5,
           dpi=600)
 
 save_plot_mul(file.path(plt_dir, "fig3_sup"), c("pdf", "png", "eps"), plt_pos_effect_supp,
-          ncol=7, nrow=1, base_height=3.5, base_aspect_ratio=0.7,
+          ncol=3, nrow=2, base_height=2, base_aspect_ratio=1.5,
           dpi=600)
 
 ## save_plot(file.path(plt_dir, "pos_effects.png"), plt_pos_effect,
