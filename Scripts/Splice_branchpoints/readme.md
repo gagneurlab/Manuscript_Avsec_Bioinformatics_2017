@@ -17,7 +17,7 @@ Start workers and run train.py
 
 Run:
 - python postprocess.py
-- python interpret_model.py
+- python interpret_shallow_model.py
 - Rscript 3_bootstrap_predictions.R
 
 # Plot

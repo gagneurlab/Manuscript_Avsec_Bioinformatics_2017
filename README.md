@@ -40,3 +40,7 @@ In each experiment folder, the main files are:
 - train.py - runs model training and hyper-parameter optimization
 
 R should be started from the repository root.
+
+## Code for producing the plots
+
+Is located at `Scripts/Figures/`.
