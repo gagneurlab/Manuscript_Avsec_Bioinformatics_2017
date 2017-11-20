@@ -478,6 +478,7 @@ dt2granges <- function(dt, ...) {
 ##' @return GRanges with width = 1
 ##' @author Žiga Avsec
 intersect_center <- function(grlist) {
+  if (length(grlist) == 0) return(NULL)
   gr_intersect <- Reduce(GenomicRanges::intersect, grlist) #subsetByOverlaps
 
   ## take peak middle-point
@@ -485,3 +486,24 @@ intersect_center <- function(grlist) {
   return(gr_intersect)  
 }
 
+
+##' Concatenate a list of genomic ranges together 
+##' 
+##' @param gr_list - list of GRanges
+##' @param idcol name of the new appended column.
+##' analogous to idcol in data.table::rbindlist
+##' @return GRanges
+gr_rbindlist <- function(gr_list, idcol="id") {
+  ## all names have to be undefined
+  if (length(gr_list) == 0) return(NULL)
+
+  gr_list <- omit_null(gr_list)
+  stopifnot(all(sapply(gr_list, function(x) is.null(names(x)))))
+  
+  grnew <- unlist(GRangesList(gr_list))
+  mcols(grnew)[[idcol]] <- names(grnew)
+  names(grnew) <- NULL
+
+  stopifnot(sum(sapply(gr_list, length)) == length(grnew))
+  return(grnew)
+}

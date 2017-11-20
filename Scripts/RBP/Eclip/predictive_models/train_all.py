@@ -5,25 +5,29 @@ Author: Ziga Avsec
 Affiliation: TUM
 """
 from hyperopt import fmin, tpe, hp, pyll
-from concise.hyopt import CompileFN, CMongoTrials, test_fn
 from copy import deepcopy
 import numpy as np
 from glob import glob
 import os
 import data
 import model
+from joblib import Parallel, delayed
+import argparse
+from concise.hyopt import CompileFN, CMongoTrials, test_fn
 
 
 def print_exp(exp_name):
     print("-" * 40 + "\nexp_name: " + exp_name)
 
+
 DIR_ROOT = data.DIR_ROOT
 PROC_DIR = DIR_ROOT + "/processed"
 
 PROC_DIR = DIR_ROOT + "/processed"
-MAX_EVALS = 20  # 50 - before it was 20
+MAX_EVALS = 20
+MAX_EVALS_subset = 50
 
-KILL_TIMEOUT = 60 * 20  # 20 minutes
+KILL_TIMEOUT = 60 * 80  # 30 minutes
 
 RBP_LIST = ["UPF1", "PUM2", "DDX3X", "NKRF", "TARDBP", "SUGP2"]
 
@@ -31,14 +35,14 @@ RBP_LIST = ["UPF1", "PUM2", "DDX3X", "NKRF", "TARDBP", "SUGP2"]
 RBP_ALL = [os.path.basename(x).replace(".csv", "")
            for x in glob(PROC_DIR + "/design_matrix/train/*.csv") if "extended" not in x]
 
-DB_NAME = "RBP__Eclip"
-
 RUN_TEST = False
 
+DB_NAME = "RBP__Eclip"
+HOST = "ouga03"
 POS_FEATURES = ['tss', 'polya', 'exon_intron', 'intron_exon', 'start_codon',
                 'stop_codon', 'gene_start', 'gene_end']
 
-from joblib import Parallel, delayed
+POS_FEATURES_start_end = ["gene_start", "gene_end"]
 
 
 # functions
@@ -60,9 +64,10 @@ class RunFN():
         fn.exp_name = c_exp_name
         print_exp(c_exp_name)
         # run
-        trials = CMongoTrials(self.db_name, c_exp_name, kill_timeout=30 * 60)
+        trials = CMongoTrials(self.db_name, c_exp_name, kill_timeout=KILL_TIMEOUT)
         best = fmin(fn, c_hyper_params, trials=trials, algo=tpe.suggest, max_evals=self.max_evals)
         print("best_parameters: " + str(best))
+
 
 def run_DeepNN_trials(exp_name, fn, hyper_params,
                       run_test=True,
@@ -89,13 +94,21 @@ def run_DeepNN_trials(exp_name, fn, hyper_params,
 
 if __name__ == "__main__":
 
-    print(RBP_ALL)
+    parser = argparse.ArgumentParser(description="run hyper-parameter optimization")
+    parser.add_argument('--notest', action='store_true')
+    args = parser.parse_args()
+
+    run_test = not args.notest
+    rbp_set = RBP_ALL
+    rbp_subset = ["UPF1", "PUM2", "DDX3X", "NKRF", "TARDBP", "SUGP2"]
+
+    print(rbp_set)
     # --------------------------------------------
     exp_name = "DeepNN_ext"
     print_exp(exp_name)
     # -----
     fn = CompileFN(DB_NAME, exp_name,
-                   data_fn=data.data_extended,
+                   data_fn=data.data_extended_cached,
                    model_fn=model.model,
                    add_eval_metrics=["auprc", "auc"],
                    loss_metric="auprc",
@@ -129,10 +142,36 @@ if __name__ == "__main__":
     chp_test["data"]["rbp_name"] = "UPF1"
     # test_fn(fn, chp_test)
     run_DeepNN_trials(exp_name, fn, c_hyper_params,
-                      run_test=RUN_TEST,
+                      run_test=run_test,
                       max_evals=MAX_EVALS,
-                      rbp_list=RBP_ALL)
+                      rbp_list=rbp_set)
 
+    # --------------------------------------------
+    exp_name = "DeepNN"
+    # -----
+
+    c_hyper_params = deepcopy(hyper_params)
+    c_hyper_params["model"]["external_pos"] = None
+
+    # run for all the RBP's
+    run_DeepNN_trials(exp_name, fn, c_hyper_params,
+                      run_test=run_test,
+                      max_evals=MAX_EVALS,
+                      rbp_list=rbp_subset)
+    # --------------------------------------------
+    exp_name = "DeepNN_scalar_position_gam"
+    # -----
+
+    c_hyper_params = deepcopy(hyper_params)
+    c_hyper_params["model"]["external_pos"] = {"type": "gam",
+                                               "feat_names": POS_FEATURES_start_end,
+                                               "units": 1}
+
+    # run for all the RBP's
+    run_DeepNN_trials(exp_name, fn, c_hyper_params,
+                      run_test=run_test,
+                      max_evals=MAX_EVALS,
+                      rbp_list=rbp_subset)
     # --------------------------------------------
     exp_name = "DeepNN_scalar_position_ext_gam"
     # -----
@@ -144,9 +183,9 @@ if __name__ == "__main__":
 
     # run for all the RBP's
     run_DeepNN_trials(exp_name, fn, c_hyper_params,
-                      run_test=RUN_TEST,
+                      run_test=run_test,
                       max_evals=MAX_EVALS,
-                      rbp_list=RBP_ALL)
+                      rbp_list=rbp_set)
     # --------------------------------------------
     exp_name = "DeepNN_scalar_position_ext_relu"
     # -----
@@ -156,6 +195,19 @@ if __name__ == "__main__":
                                                "feat_names": POS_FEATURES,
                                                "units": 1}
     run_DeepNN_trials(exp_name, fn, c_hyper_params,
-                      run_test=RUN_TEST,
+                      run_test=run_test,
                       max_evals=MAX_EVALS,
-                      rbp_list=RBP_ALL)
+                      rbp_list=rbp_set)
+    # --------------------------------------------
+    exp_name = "DeepNN_track_position_ext_gam"
+    # -----
+
+    c_hyper_params = deepcopy(hyper_params)
+    c_hyper_params["data"]["pos_as_track"] = True
+    c_hyper_params["model"]["external_pos"] = {"type": "gam",
+                                               "feat_names": POS_FEATURES,
+                                               "units": 1}
+    run_DeepNN_trials(exp_name, fn, c_hyper_params,
+                      run_test=run_test,
+                      max_evals=MAX_EVALS,
+                      rbp_list=rbp_set)

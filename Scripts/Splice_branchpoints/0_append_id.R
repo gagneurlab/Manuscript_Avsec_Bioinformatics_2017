@@ -2,13 +2,13 @@
 #' title: Append id
 #' author: Žiga Avsec
 #' wb:
-#'  input: ["data/Concise/Splice_branchpoints/processed/branchpointer/train/branchpoint_df_HCN.csv",
-#'           "data/Concise/Splice_branchpoints/processed/branchpointer/test/branchpoint_df_HCN.csv"]
-#'  output: ["data/Concise/Splice_branchpoints/processed/branchpointer/train/branchpoint_df_HCN_w_id.csv",
-#'          "data/Concise/Splice_branchpoints/processed/branchpointer/test/branchpoint_df_HCN_w_id.csv"]
+#'  input: ["data/Splice_branchpoints/processed/branchpointer/train/branchpoint_df_HCN.csv",
+#'           "data/Splice_branchpoints/processed/branchpointer/test/branchpoint_df_HCN.csv"]
+#'  output: ["data/Splice_branchpoints/processed/branchpointer/train/branchpoint_df_HCN_w_id.csv",
+#'          "data/Splice_branchpoints/processed/branchpointer/test/branchpoint_df_HCN_w_id.csv"]
 #'---
-dt_raw <- fread("data/Concise/Splice_branchpoints/processed/branchpointer/train/branchpoint_df_HCN.csv")
-dt_raw_test <- fread("data/Concise/Splice_branchpoints/processed/branchpointer/test/branchpoint_df_HCN.csv")
+dt_raw <- fread("data/Splice_branchpoints/processed/branchpointer/train/branchpoint_df_HCN.csv")
+dt_raw_test <- fread("data/Splice_branchpoints/processed/branchpointer/test/branchpoint_df_HCN.csv")
 
 dt_raw[order(new_ID)][, is.sorted(dist.1), by = new_ID]
 dt_raw[, new_ID] %>% head
@@ -113,5 +113,5 @@ dt <- dt[order(exon_id.2, dist.2)]
 
 
 ## - save the values
-write_csv(dt, "data/Concise/Splice_branchpoints/processed/branchpointer/train/branchpoint_df_HCN_w_id.csv")
-write_csv(dt_test, "data/Concise/Splice_branchpoints/processed/branchpointer/test/branchpoint_df_HCN_w_id.csv")
+write_csv(dt, "data/Splice_branchpoints/processed/branchpointer/train/branchpoint_df_HCN_w_id.csv")
+write_csv(dt_test, "data/Splice_branchpoints/processed/branchpointer/test/branchpoint_df_HCN_w_id.csv")

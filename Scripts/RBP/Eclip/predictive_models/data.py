@@ -12,13 +12,13 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import Imputer
 from tempfile import mkdtemp
 from joblib import Memory
+import os
 
-
-DIR_ROOT = "/s/project/deepcis/encode/eclip/"  # TODO change path
-# DIR_ROOT = "/home/avsec/projects-work/deepcis/data/eclip/"
+# TODO - update this path
+DIR_ROOT = os.path.expanduser("~/projects-work/code_spline_trans/data/eclip/")
 CACHE_DIR = DIR_ROOT + "cache/"
 
-memory = Memory(cachedir=CACHE_DIR, verbose=0)
+memory = Memory(cachedir=CACHE_DIR, verbose=0, mmap_mode='r')
 
 
 def get_pos_ranges(d):
@@ -53,6 +53,7 @@ def data_split(rbp_name, valid_chr=[1, 3],
     dt_train = dt_all[~dt_all.seqnames.isin(valid_chr + test_chr)]
     return dt_train, dt_valid, dt_test
 
+
 def calc_perc(data):
     train, valid, test = data
 
@@ -74,11 +75,31 @@ def sign_log_func_inverse(x):
     return np.sign(x) * (np.power(10, np.abs(x)) - 1)
 
 
+def expand_positions(x, pos_length):
+    """add a new axis and increment the integer value by one
+    for each index. 0 increment is in the middle of the array
+
+    x = np.arange(10).reshape((-1,2))
+    a = expand_positions(x, 3)
+
+    In [158]: a[0,0]
+    Out[158]: array([-1,  0,  1])
+
+    In [159]: x[0,0]
+    Out[159]: 0
+    """
+    # 1. create a matrix with incrementing positions
+    incr_array = np.arange(pos_length) - pos_length // 2
+    incr_array = incr_array.reshape((1, 1, -1))
+    return incr_array + x[..., np.newaxis]
+
+
 # memoize the function
 # @memory.cache
 def data_extended(rbp_name, n_bases=10,
                   pos_class_weight=1.0,
                   scale="sign_log",  # or "nat"
+                  pos_as_track=False,
                   valid_chr=[1, 3],
                   test_chr=[2, 4, 6, 8, 10]):
     """
@@ -90,6 +111,7 @@ def data_extended(rbp_name, n_bases=10,
     seq_valid = encodeDNA(dt_valid.seq.tolist())
     seq_test = encodeDNA(dt_test.seq.tolist())
 
+    seq_length = seq_train.shape[1]
     # impute missing values (not part of the pipeline as the Imputer lacks inverse_transform method)
     imp = Imputer(strategy="median")
     imp.fit(pd.concat([dt_train[POS_FEATURES], dt_valid[POS_FEATURES]]))
@@ -110,24 +132,60 @@ def data_extended(rbp_name, n_bases=10,
     else:
         ValueError("scale argument invalid")
 
+    dtx_train = np.array(dt_train[POS_FEATURES])
+    dtx_valid = np.array(dt_valid[POS_FEATURES])
+    dtx_test = np.array(dt_test[POS_FEATURES])
+
+    def melt_array(arr, seq_length):
+        """ 3-dim -> 2-dim transform
+
+        arr = np.arange(12).reshape((2,2,3))
+        assert np.all(unmelt_array(melt_array(arr, 3), 3) == arr)
+        """
+        arr = np.transpose(arr, (0, 2, 1))
+        assert arr.shape[2] == len(POS_FEATURES)
+        assert arr.shape[1] == seq_length
+        return arr.reshape((-1, len(POS_FEATURES)))
+
+    def unmelt_array(arr, seq_length):
+        arr = arr.reshape(((-1, seq_length, len(POS_FEATURES))))
+        return np.transpose(arr, (0, 2, 1))
+
+    if pos_as_track:
+        dtx_train = melt_array(expand_positions(dtx_train, seq_length), seq_length)
+        dtx_valid = melt_array(expand_positions(dtx_valid, seq_length), seq_length)
+        dtx_test = melt_array(expand_positions(dtx_test, seq_length), seq_length)
+
     # transform pos features
-    preproc_pipeline.fit(pd.concat([dt_train[POS_FEATURES], dt_valid[POS_FEATURES]]))
-    train_pos = pd.DataFrame(preproc_pipeline.transform(dt_train[POS_FEATURES]), columns=POS_FEATURES)
-    valid_pos = pd.DataFrame(preproc_pipeline.transform(dt_valid[POS_FEATURES]), columns=POS_FEATURES)
-    test_pos = pd.DataFrame(preproc_pipeline.transform(dt_test[POS_FEATURES]), columns=POS_FEATURES)
+    preproc_pipeline.fit(np.concatenate([dtx_train, dtx_valid]))
 
-    def create_feature_dict(dt):
-        # NOTE: concise now implements a transoformer API - concise.preprocessing.EncodeSplines with methods:
-        # .fit
-        # .predict
-        # and operates on multiple features in a single array. Please use that one instead.
-        raw_dist = {"raw_dist_" + k: np.array(v)[:, np.newaxis, np.newaxis] for k, v in dt.items()}
-        dist = {"dist_" + k: encodeSplines(np.array(v)[:, np.newaxis], start=0, end=1) for k, v in dt.items()}
-        return {**raw_dist, **dist}
+    train_pos = preproc_pipeline.transform(dtx_train)
+    valid_pos = preproc_pipeline.transform(dtx_valid)
+    test_pos = preproc_pipeline.transform(dtx_test)
 
-    train_dist = create_feature_dict(train_pos)
-    valid_dist = create_feature_dict(valid_pos)
-    test_dist = create_feature_dict(test_pos)
+    def create_feature_dict(arr, seq_length, pos_as_track):
+        if pos_as_track:
+            arr = unmelt_array(arr, seq_length)
+        else:
+            arr = arr[..., np.newaxis]
+
+        raw_dist = {"raw_dist_" + k: arr[:, i][..., np.newaxis]
+                    for i, k in enumerate(POS_FEATURES)}
+        # (batch, seq_length / 1, 1)
+
+        dist = {"dist_" + k: encodeSplines(arr[:, i], start=0, end=1)
+                for i, k in enumerate(POS_FEATURES)}
+        # (batch, seq_length / 1, default number of splines)
+
+        # add also the merged version - last dimension = features
+        raw_dist_all = np.concatenate([raw_dist["raw_dist_" + k] for k in POS_FEATURES], axis=-1)
+        # (batch, seq_length / 1, n_features)
+
+        return {**raw_dist, **dist, **{"raw_dist_all": raw_dist_all}}
+
+    train_dist = create_feature_dict(train_pos, seq_length, pos_as_track)
+    valid_dist = create_feature_dict(valid_pos, seq_length, pos_as_track)
+    test_dist = create_feature_dict(test_pos, seq_length, pos_as_track)
 
     x_train = {"seq": seq_train, **train_dist}
     x_valid = {"seq": seq_valid, **valid_dist}
@@ -142,6 +200,9 @@ def data_extended(rbp_name, n_bases=10,
     return (x_train, y_train, sample_weight, POS_FEATURES, preproc_pipeline), \
         (x_valid, y_valid),\
         (x_test, y_test)
+
+
+data_extended_cached = memory.cache(data_extended)
 
 
 # @memory.cache
@@ -275,3 +336,6 @@ def data(rbp_name, n_bases=10,
           # "raw_dist_polya_nat": polya_dist["test"],
           "raw_dist_polya_log": get_raw_polya_log_dist(polya_dist["test"])},
          y_test)
+
+
+data_cached = memory.cache(data)

@@ -1,8 +1,6 @@
-## Spline transformation paper
+# Manuscript_Avsec_Bioinformatics_2017
 
-**Disclaimer:** I'm in the process of porting the code from my research repository and haven't tested the whole pipeline end-to-end. I will also provide the intermediary raw files soon.
-
-[Avsec *et al* 2017 Bioarxiv](https://doi.org/10.1101/165183)
+Code for [Avsec et al, Bioinformatics 2017](https://doi.org/10.1093/bioinformatics/btx727) (Bioarxiv preprint [Avsec et al, Bioarxiv 2017](https://doi.org/10.1101/165183)).
 
 ## Installing requirements
 
@@ -44,3 +42,7 @@ R should be started from the repository root.
 ## Code for producing the plots
 
 Is located at `Scripts/Figures/`.
+
+## TODO
+
+- [ ] add the intermediary pre-processed datasets

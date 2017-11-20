@@ -3,7 +3,7 @@
 #' author: Žiga Avsec
 #'---
 # 
-#  input: ["data/Concise/Splice_branchpoints/trials/train_history/gam_vs_relu.csv"]
+#  input: ["data/Splice_branchpoints/trials/train_history/gam_vs_relu.csv"]
 
 ## example:
 ## 
@@ -21,7 +21,7 @@ gam_vs_relu_loss_curves_plot <- function(top_N=10, use_metrics = c("loss"),
                                        min_epoch = 0,
                                        deep_max_epoch=50) {
   library(cowplot)
-  EXP_DIR = "data/Concise/Splice_branchpoints/"
+  EXP_DIR = "data/Splice_branchpoints/"
   dt <- fread(file.path(EXP_DIR, "trials/train_history/gam_vs_relu.csv"))  
   dt[, V1 := NULL]
   top_dt <- dt[, .(tid, trial)] %>% unique %>% .[, .SD[1:top_N], by = trial]
@@ -61,7 +61,7 @@ gam_vs_relu_loss_curves_plot <- function(top_N=10, use_metrics = c("loss"),
 
 gam_vs_relu_loss_curves_dt <- function(top_N=10) {
   library(cowplot)
-  EXP_DIR = "data/Concise/Splice_branchpoints/"
+  EXP_DIR = "data/Splice_branchpoints/"
   dt <- fread(file.path(EXP_DIR, "trials/train_history/gam_vs_relu.csv"))  
   dt[, V1 := NULL]
   top_dt <- dt[, .(tid, trial)] %>% unique %>% .[, .SD[1:top_N], by = trial]

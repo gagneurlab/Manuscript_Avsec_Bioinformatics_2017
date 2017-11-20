@@ -11,7 +11,6 @@ import concise.initializers as ci
 import concise.regularizers as cr
 import concise.metrics as cm
 import concise.layers as cl
-import concise.activations as ca
 from concise.utils import model_data
 import keras.backend as K
 from concise.optimizers import AdamWithWeightnorm, data_based_init

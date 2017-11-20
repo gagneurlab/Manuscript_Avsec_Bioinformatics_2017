@@ -1,8 +1,11 @@
 ## Idea - for each plot, you need two essential components: data
 ## (returned by some data function and the plot itself)
 
-source("Scripts/Figures/func/pr_roc.R")
-
+mname_hash <- c("kmer-glmnet" = "kmer-glmnet",
+                "kmer-glmnet_pos" = "kmer-glmnet_pos",
+                "no_pos" = "DeepNN",
+                "gam" = "DeepNN_pos_spline-t"
+                )
 get_glmnet <- function(cache=TRUE) {
   message("Get glmnet")
   cache_file <- "data/eclip/processed/predictions/boostrap_glmnet_auc_auprc.csv"
@@ -34,7 +37,7 @@ get_glmnet <- function(cache=TRUE) {
 
 get_dtb_eclip_subset <- function(cache=TRUE) {
   ## deepnn
-  dtb_clip <- get_eClip_metric(cache=cache, which="subset")
+  dtb_clip <- get_eCLIP_metric(cache=cache, which="subset")
   dtb_glmnet <- get_glmnet(cache=cache)
 
   dtb_clip %>% setnames("subtask", "rbp")
@@ -47,11 +50,7 @@ get_dtb_eclip_subset <- function(cache=TRUE) {
 
   dtb <- dtb[!grepl("relu", as.character(Method))]
   ## re-naming
-  mname_hash <- c("kmer-glmnet" = "kmer-glmnet",
-                  "kmer-glmnet_pos" = "kmer-glmnet_pos",
-                  "no_pos" = "DeepNN",
-                  "gam" = "DeepNN_pos_spline-t"
-                  )
+
   hash_name <- function(x,h) {
     fct_relevel(h[as.character(x)], h)
   }

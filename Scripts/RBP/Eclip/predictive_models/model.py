@@ -14,7 +14,6 @@ import concise.initializers as ci
 import concise.regularizers as cr
 import concise.metrics as cm
 import concise.layers as cl
-import concise.activations as ca
 from concise.utils import model_data
 import keras.backend as K
 from concise.optimizers import AdamWithWeightnorm, data_based_init
@@ -36,18 +35,18 @@ def get_pool(pooling):
         raise ValueError("")
 
 
-def pos_module(pos_length, ext_n_bases, ext_filters, feat_name, ext_pos_kwargs):
+def pos_module(pos_length, ext_n_bases, ext_filters, feat_name, kernel_size, ext_pos_kwargs):
     """Used position module function, calls pos_spline_trans or pos_affine_relu
     """
     if ext_pos_kwargs["type"] == "gam":
-        return pos_spline_trans(pos_length, ext_n_bases, ext_filters, feat_name, ext_pos_kwargs)
+        return pos_spline_trans(pos_length, ext_n_bases, ext_filters, feat_name, kernel_size, ext_pos_kwargs)
     elif ext_pos_kwargs["type"] == "relu":
-        return pos_affine_relu(pos_length, ext_n_bases, ext_filters, feat_name, ext_pos_kwargs)
+        return pos_affine_relu(pos_length, ext_n_bases, ext_filters, feat_name, kernel_size, ext_pos_kwargs)
     else:
         raise ValueError("pos_type invalid")
 
 
-def pos_spline_trans(pos_length, ext_n_bases, ext_filters, feat_name, ext_pos_kwargs):
+def pos_spline_trans(pos_length, ext_n_bases, ext_filters, feat_name, kernel_size, ext_pos_kwargs):
     """Get the spline transformation module
 
     Returns the input and output node
@@ -56,15 +55,27 @@ def pos_spline_trans(pos_length, ext_n_bases, ext_filters, feat_name, ext_pos_kw
                             l2_smooth=ext_pos_kwargs.get("l2_smooth", 0))
     inp = cl.InputSplines(pos_length, n_bases=ext_n_bases,
                           name="dist_" + feat_name)
+
+    # subset the array according to the stride
+    if pos_length != 1:
+        shorten = kernel_size - 1
+        shorten_before = shorten // 2 + shorten % 2
+        shorten_after = shorten // 2
+        x = kl.Lambda(lambda x, shorten_before, shorten_after, pos_length: x[:, shorten_before:(pos_length - shorten_after)],
+                      arguments={"shorten_before": shorten_before,
+                                 "shorten_after": shorten_after,
+                                 "pos_length": pos_length})(inp)
+    else:
+        x = inp
     x = cl.ConvSplines(filters=ext_filters,
                        kernel_regularizer=reg,
-                       name="conv_dist_" + feat_name)(inp)
+                       name="conv_dist_" + feat_name)(x)
     if not ext_pos_kwargs["as_track"]:
         x = kl.Flatten()(x)
     return inp, x
 
 
-def pos_affine_relu(pos_length, ext_n_bases, ext_filters, feat_name, ext_pos_kwargs):
+def pos_affine_relu(pos_length, ext_n_bases, ext_filters, feat_name, kernel_size, ext_pos_kwargs):
     """Get the affine+relu transformation module
 
     Returns the input and output node
@@ -113,7 +124,7 @@ def model(train_data,
         # conf
         external_pos["as_track"] = train_data[0]["dist_tss"].shape[1] != 1
         if external_pos["as_track"]:
-            pos_length = seq_length - kernel_size + 1
+            pos_length = seq_length
         else:
             pos_length = 1
 
@@ -124,6 +135,7 @@ def model(train_data,
         pos_inputs, pos_outputs = tuple(zip(*[pos_module(pos_length=pos_length,
                                                          ext_n_bases=ext_n_bases,
                                                          ext_filters=ext_filters,
+                                                         kernel_size=kernel_size,
                                                          feat_name=feat_name,
                                                          ext_pos_kwargs=external_pos)
                                               for feat_name in external_pos.get("feat_names",

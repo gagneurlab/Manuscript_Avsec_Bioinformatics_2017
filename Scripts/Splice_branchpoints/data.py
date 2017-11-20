@@ -9,11 +9,12 @@ from concise.utils.pwm import PWM
 import os
 import pickle
 # load the data
-DATA_ROOT = "/s/project/deepcis/"
-DATA_ROOT = os.path.expanduser("~/projects-work/deepcis/data/")
-BR_DATA = DATA_ROOT + "/Concise/Splice_branchpoints/processed/branchpointer/"
-BR_PWM = DATA_ROOT + "/Concise/Splice_branchpoints/processed/branchpointer/hc_pwm.json"
-BR_SPLICE_RACK_PATH = DATA_ROOT + "/Concise/Splice_branchpoints/raw/U12_splice_sites_SpliceRack/"
+
+# TODO - update
+DATA_ROOT = os.path.expanduser("~/projects-work/code_spline_trans/data/")
+BR_DATA = DATA_ROOT + "/Splice_branchpoints/processed/branchpointer/"
+BR_PWM = DATA_ROOT + "/Splice_branchpoints/processed/branchpointer/hc_pwm.json"
+BR_SPLICE_RACK_PATH = DATA_ROOT + "/Splice_branchpoints/raw/U12_splice_sites_SpliceRack/"
 
 pos_columns = ["dist1", "dist2",
                "ppt_start", "ppt_run_length",
@@ -54,7 +55,7 @@ def get_branchpoint_pwm_list(cache=True):
     if os.path.isfile(BR_PWM) and cache:
         l.append(PWM.from_config(read_json(BR_PWM)))
     else:
-        dt = pd.read_csv(DATA_ROOT + "/Concise/Splice_branchpoints/processed/branchpointer/train/filteredDescr.csv")
+        dt = pd.read_csv(DATA_ROOT + "/Splice_branchpoints/processed/branchpointer/train/filteredDescr.csv")
         # colmeans
         dt = dt[dt.set == "HC"]
         dtseq = dt[dt.columns[dt.columns.str.match("^seq_")]] - 1

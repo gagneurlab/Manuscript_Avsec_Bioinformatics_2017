@@ -21,17 +21,24 @@ message("read raw data")
 grlist <- read_encode_eclip_bed()
 mdata <- read_encode_eclip_meta()
 
+cell_lines <- mdata[, unique(sample)]
+
 ##' ## Merge peaks by samples OR ovelap peaks from the same protein
 message("find consensus peaks")
 grlist_by_protein <- sapply(mdata[, unique(protein)],
                             function(prot)
-                              grlist[mdata[prot == protein, file]], simplify = FALSE)
-protein_peak_overlaps <- pblapply(grlist_by_protein, intersect_center) %>%
-  GRangesList %>% unlist
-protein_peak_overlaps$protein <- names(protein_peak_overlaps)
+                              sapply(cell_lines, function(cl) {
+                                grlist[mdata[prot == protein & sample == cl, file]] 
+                              }, simplify = FALSE), simplify = FALSE)
+# intersect for replicates, append for different cell-lines
+protein_peak_overlaps <- pblapply(grlist_by_protein, . %>% lapply(intersect_center)
+                                  %>% gr_rbindlist(idcol="sample")) %>% gr_rbindlist(idcol="protein")
 message("save protein_peak_overlaps")
 saveRDS(protein_peak_overlaps,
         "data/eclip/processed/protein_peak_overlaps.rds")
+## --------------------------------------------
+
+protein_peak_overlaps <- readRDS("data/eclip/processed/protein_peak_overlaps.rds")
 ## save protein_peak_overlaps
 
 ## for each protein - get the peak positions wrt each gene
@@ -52,7 +59,11 @@ length(protein_peak_overlaps)
 
 ## not mapped to any of the genes:
 1 - uniqueN(subjectHits(ol)) / length(protein_peak_overlaps)
-## [1] 0.1013787
+## [1] 0.09943839
+## OLD - [1] 0.1013787
+## Number of peaks with a single match
+data.table(pid = subjectHits(ol))[, .N, by =pid][, mean(N ==  1)]
+## Number of genes per peak
 length(subjectHits(ol))/uniqueN(subjectHits(ol))
 
 ## append generate negative training examples

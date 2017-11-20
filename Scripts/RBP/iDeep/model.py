@@ -80,7 +80,10 @@ def model_ideep(train_data, features, seed=None):
             net_list.append(get_rnn_fea(train_data[feature], fea_num_hidden[feature]))
 
     model = Sequential()
-    model.add(Merge(net_list, mode='concat'))
+    if len(net_list) > 1:
+        model.add(Merge(net_list, mode='concat'))
+    else:
+        model.add(net_list[0])
     model.add(Dropout(0.5))
     model.add(Dense(1, activation='sigmoid'))
     model.compile(loss='binary_crossentropy', optimizer='rmsprop')

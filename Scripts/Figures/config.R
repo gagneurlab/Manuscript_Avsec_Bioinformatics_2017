@@ -4,6 +4,7 @@
 ## LocusZoom
 ## Lancet
 ## npg
+library(RColorBrewer)
 library(cowplot)
 library(ggsci)
 library(dtplyr)
@@ -34,7 +35,7 @@ save_plot_mul <- function(basename, formats, ...) {
 white_facets <- theme(strip.background = element_rect(colour="white",
                                                       fill="white")) # remove tabs from facets
 
-source_all("Scripts/Concise/Paper/func")
+source_all("Scripts/Figures/func/")
 
 ## mypal = pal_locuszoom( alpha = 0.7)(10)
 ## mypal

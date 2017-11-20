@@ -27,7 +27,9 @@ opts_knit$set(root.dir = getwd())
 opts_chunk$set(echo=FALSE, cache=F, results = 'hide', messages = FALSE)
 options(width=140)
 ## 
-plt_dir <- "data/plots/RBP/Eclip/"
+#plt_dir <- "data/plots/RBP/Eclip/"
+plt_dir <- "data/plots/"
+#plt_dir <- "~/projects-work/spline_trans/plots/"
 dir.create(plt_dir, showWarnings = FALSE, recursive = TRUE)
 source("Scripts/Figures/config.R")
 
@@ -38,12 +40,14 @@ cols <- c(col_glmnet, col_branchpointer, col_concise_shallow, col_concise_deep)
 rbps <- c("UPF1", "PUM2", "DDX3X", "NKRF", "TARDBP", "SUGP2")
 ## ---------------------------------
 dtb <- get_dtb_eclip_subset() # dtb_auc, dtb_auprc
+dtb <- dtb[rbp %in% rbps]
+dtb[, rbp := fct_relevel(rbp, rbps)]
 
 q_auc <- ggplot(dtb[metric == "auc"], aes(x = Method, y = value)) +
   geom_boxplot(aes(color=Method)) +
   geom_jitter(aes(color=Method), alpha=0.1, size=0.5) +
-  scale_color_manual(labels=c("glmnet", "glmnet w/ rel. distances",
-                              "DNN", "DNN w/ rel. distances"),
+  scale_color_manual(labels=c("glmnet", "glmnet w/ dist",
+                              "DNN", "DNN w/ dist"),
                      values=cols) + 
   geom_signif(comparisons = list(c("DeepNN", "DeepNN_pos_spline-t"),
                                  c("kmer-glmnet_pos", "DeepNN"),
@@ -72,10 +76,11 @@ q_auprc + theme(panel.grid.major.y=element_line("grey50"))
 plt_auc <- plot_grid(q_auc, labels="")
 plt_auprc <- plot_grid(q_auprc, labels="a")
 
+## Side-by-side plot
+## plt_boxplot <- plot_grid(plot_grid(q_auc + legend_off, q_auprc + legend_off,
+##                                    labels=c("a", "b"), align="v"),
+##                        lgd, ncol=1, rel_heights=c(1, 0.07))
 lgd <- get_legend(q_auc)
-plt_boxplot <- plot_grid(plot_grid(q_auc + legend_off, q_auprc + legend_off,
-                                   labels=c("a", "b"), align="v"),
-                       lgd, ncol=1, rel_heights=c(1, 0.07))
 
 ## --------------------------------------------
 ## add the torkler plot
@@ -97,7 +102,9 @@ scientific_10 <- function(x, digits=3) {
          )
 }
 
-tp <- tp + scale_y_continuous(labels = scales::comma) +  scale_x_continuous(breaks = c(0, 50000), labels = scales::comma)
+tp <- tp + scale_y_continuous(labels = scales::comma) +
+  scale_x_continuous(breaks = c(0, 50000), labels = scales::comma) +
+  xlab("Distance to TSS (nt)")
 ## tp <- tp + scale_y_continuous(labels = scientific_10) +  scale_x_continuous(breaks = c(0, 50000), labels = scientific_10)
 tp
 
@@ -110,20 +117,26 @@ dtm <- get_metric_comparison(1e-4)
 df1 <- dtm[task != "branch-point" & metric == "auprc"]
 
 ## statistics for the paper
-df1[task == "eClip" & subtask =="UPF1"]
+df1[task == "eCLIP" & subtask =="UPF1"]
 ##      task subtask metric       gam      relu    no_pos  p.gam__relu p.gam__no_pos signif.gam__relu signif.gam__no_pos
 ##    <char>  <char> <char>     <num>     <num>     <num>        <num>         <num>           <lgcl>             <lgcl>
-## 1:  eClip    UPF1    auc 0.9444418 0.9392438 0.7992773 1.440169e-44  4.830856e-67             TRUE               TRUE
+## 1:  eCLIP    UPF1    auc 0.9444418 0.9392438 0.7992773 1.440169e-44  4.830856e-67             TRUE               TRUE
 
-## > df1[task == "eClip", gam - no_pos] %>% summary
+## > df1[task == "eCLIP", gam - no_pos] %>% summary
 ##      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
 ## -0.002254  0.027951  0.051840  0.055303  0.071242  0.239969 
 
-## df1[task == "eClip", wilcox.test(gam, no_pos, paired = TRUE)]
+## df1[task == "eCLIP", wilcox.test(gam, no_pos, paired = TRUE)]
 ## V = 6306, p-value < 2.2e-16
 ## > dtm[task == "iClip" & metric == "auc", wilcox.test(gam, no_pos, paired = TRUE)]
 
-## 	Wilcoxon signed rank test
+## Wilcoxon signed rank test
+## df1[task == "eCLIP", wilcox.test(gam, relu, paired = TRUE)]
+## V = 6258, p-value < 2.2e-16
+
+## Wilcoxon signed rank test
+## df1[task == "CLIP", wilcox.test(gam, relu, paired = TRUE)]
+## V = 489, p-value = 1.77e-08
 
 ## data:  gam and no_pos
 ## V = 488, p-value = 2.328e-08
@@ -136,22 +149,28 @@ df1[task == "eClip" & subtask =="UPF1"]
 ## shared RBP's: hnRNPC, Nsun2, PUM2, QKI, SRSF1, TAF15, TIA1, U2AF2
 
 ## dtm[task == "eCLIP" & metric == "auprc", .(subtask, signif.gam__no_pos)] %>% print(112)
-## dtm[task == "eCLIP" & metric == "auprc", .(subtask, signif.gam__no_pos)][, table(signif.gam__o_pos)]
+## dtm[task == "eCLIP" & metric == "auprc", .(subtask, signif.gam__no_pos)][, table(signif.gam__no_pos)]
 ## CLIP not signif: ESWR1, PUM2, SRSF1, TAF15
 
 ## 104 / 112 - PUM2, SRSF1, TAF15 are all significant
 ## 10/11 for unique CLIP
 ## In total: 114 / 123
+
+df1[task == "eCLIP" & subtask =="UPF1"]
+
 in_top <- function(x, n = 20) {
   return(rank(- x) <= n)
 }
+## TOP 10 best:
 df1[, add_label := (subtask %in% rbps) |  !signif.gam__no_pos|
-        (task == "eClip" & in_top(gam- no_pos, 10)) |
-        (task == "iClip" & in_top(gam- no_pos, 10))
+        (task == "eCLIP" & in_top(-(gam- no_pos), 10)) | # worst 10
+        (task == "eCLIP" & in_top(gam- no_pos, 10)) | # top 10 
+        (task == "CLIP" & in_top(-(gam- no_pos), 10)) | # worst 10
+        (task == "CLIP" & in_top(gam- no_pos, 10)) # top 10 
   , by = task] # TOP 20 from 
-df1[, from_before := subtask %in% rbps & task != "iClip"]
+df1[, from_before := subtask %in% rbps & task != "CLIP"]
 
-df1[, task_name := ifelse(task == "iClip", "iClip (iDeep)", task)]
+df1[, task_name := ifelse(task == "CLIP", "CLIP (iDeep)", task)]
 
 ## TODO - split into two pieces
 ## TODO - show just one color
@@ -177,8 +196,8 @@ pl_scatter <- function(df1) {
                                   "Not significant",
                                   bquote(list(p[adj] < 0.0001, bar(x) > bar(y))),
                                   "", "")) + 
-    xlim(c(0.29, .97)) + 
-    ylim(c(0.29, .97)) + 
+    xlim(c(0.32, .97)) + 
+    ylim(c(0.32, .97)) + 
     ## xlim(c(0.68, 1)) +
     ## ylim(c(0.68, 1)) +
     ylab("auPR with spline transformation") +
@@ -211,10 +230,8 @@ fig2 <- plot_grid(plot_grid(tp, q_auprc, ncol=1, labels = c("a", "b"),
                   plt_test_perf, rel_heights=c(1.3, 1), ncol = 1)
 fig2
 
-overleaf_plt_dir <- "~/projects-work/spline_trans/plots"
-
 ## eps will be made from inkscape, re-arranging the labels
-save_plot_mul(file.path(overleaf_plt_dir, "fig2"), c("pdf", "png"), fig2,
+save_plot_mul(file.path(plt_dir, "fig2"), c("pdf", "png"), fig2,
           ncol = 1,
           nrow = 3,
           base_aspect_ratio = 2.8,
@@ -231,10 +248,12 @@ dir_list <- list.files("data/eclip/processed/design_matrix/train", full.names = 
   grep("extended.csv$", ., value=TRUE)
 dt_all <- lapply(dir_list, fread) %>% rbindlist
 
-rbp_subset <- df1[task == "eCLIP" & add_label][order(-from_before,
-                                                     -signif.gam__no_pos,
-                                                     no_pos)][, subtask]
-rbp_subset <- c(rbps, rbp_subset[!rbp_subset %in% rbps])
+## TODO - select top 10 and bottom 10 + the 6 RBPs
+## rbp_subset <- df1[task == "eCLIP" & add_label][order(-from_before,
+##                                                      -signif.gam__no_pos,
+##                                                      no_pos)][, subtask]
+rbp_subset <- df1[task == "eCLIP" & add_label][order(-(gam - no_pos))][, subtask]
+## rbp_subset <- c(rbps, rbp_subset[!rbp_subset %in% rbps])
 features <- c("gene_start", "TSS", "start_codon",
               "exon_intron", "intron_exon",
               "stop_codon", "polya", "gene_end")
@@ -243,6 +262,15 @@ dtm_all <- melt(dt_all, id.vars=c("rbp", "binding_site"), measure.vars=features)
 dtm_all_pl <- dtm_all[rbp %in% rbp_subset]
 dtm_all_pl[, rbp := fct_relevel(rbp, rbp_subset)]
 dtm_all_pl[, variable := fct_relevel(variable, features)]
+dtm_all_pl[, variable := fct_recode(variable,
+                                    "gene TSS" = "gene_start",
+                                    "gene polyA" = "gene_end",
+                                    "transcr. TSS" = "TSS",
+                                    "transcr. polyA" = "polya",
+                                    "exon-intron" = "exon_intron",
+                                    "intron-exon" = "intron_exon",
+                                    "stop codon" = "stop_codon",
+                                    "start codon" = "start_codon")]
 
 fig2_sup <- ggplot(dtm_all_pl, aes(x = - sign(value) * log10(abs(value)), color = binding_site)) +
   geom_density() +
@@ -254,7 +282,7 @@ fig2_sup <- ggplot(dtm_all_pl, aes(x = - sign(value) * log10(abs(value)), color 
 #+ fig.height=15, fig.width=10
 fig2_sup
 
-save_plot_mul(file.path(overleaf_plt_dir, "fig2_sup2"), c("png", "eps", "pdf"), fig2_sup,
+save_plot_mul(file.path(plt_dir, "fig2_sup2"), c("png", "eps", "pdf"), fig2_sup,
           ncol = 1,
           nrow = 1,
           base_aspect_ratio = 0.8,
@@ -280,7 +308,7 @@ fig2_sup1 <- ggplot(dt_genes_wp ,aes(x = TSS_distance/ width, color = binding_si
   legend_top + 
   tilt_xlab
 
-save_plot_mul(file.path(overleaf_plt_dir, "fig2_sup1"), c("png", "eps", "pdf"), fig2_sup1,
+save_plot_mul(file.path(plt_dir, "fig2_sup1"), c("png", "eps", "pdf"), fig2_sup1,
           ncol = 1,
           nrow = 1,
           base_aspect_ratio = 0.8,

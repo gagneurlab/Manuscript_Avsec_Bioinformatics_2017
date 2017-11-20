@@ -2,10 +2,10 @@
 #' title: Convert long to wide format
 #' author: Žiga Avsec
 #' wb:
-#'   input: ["data/Concise/Splice_branchpoints/processed/branchpointer/train/branchpoint_df_HCN_w_id.csv",
-#'          "data/Concise/Splice_branchpoints/processed/branchpointer/test/branchpoint_df_HCN_w_id.csv"]
-#'   output: ["data/Concise/Splice_branchpoints/processed/branchpointer/test/wide_data.csv",
-#'            "data/Concise/Splice_branchpoints/processed/branchpointer/train/wide_data.csv"]
+#'   input: ["data/Splice_branchpoints/processed/branchpointer/train/branchpoint_df_HCN_w_id.csv",
+#'          "data/Splice_branchpoints/processed/branchpointer/test/branchpoint_df_HCN_w_id.csv"]
+#'   output: ["data/Splice_branchpoints/processed/branchpointer/test/wide_data.csv",
+#'            "data/Splice_branchpoints/processed/branchpointer/train/wide_data.csv"]
 #'---
 GENOME_FA <- "~/github/splice_branchpoints/data/inputs/Homo_sapiens.GRCh37.67.dna.toplevel.fa"
 flog.info("read the genome")
@@ -19,8 +19,8 @@ keep <- chrs %in% regular_human_chromosome() & !chrs %in% exclude_chr
 names(genome) <- chrs
 genome <- genome[keep]
 
-dt_train <- fread("data/Concise/Splice_branchpoints/processed/branchpointer/train/branchpoint_df_HCN_w_id.csv")
-dt_test <- fread("data/Concise/Splice_branchpoints/processed/branchpointer/test/branchpoint_df_HCN_w_id.csv")
+dt_train <- fread("data/Splice_branchpoints/processed/branchpointer/train/branchpoint_df_HCN_w_id.csv")
+dt_test <- fread("data/Splice_branchpoints/processed/branchpointer/test/branchpoint_df_HCN_w_id.csv")
 
 ## main function
 long_to_wide <- function(dt, genome) {
@@ -137,8 +137,8 @@ flog.info("long-> wide for test")
 dt_test_wide <- long_to_wide(dt_test, genome)
 
 flog.info("save the data")
-write_csv(dt_train_wide, "data/Concise/Splice_branchpoints/processed/branchpointer/train/wide_data.csv")
-write_csv(dt_test_wide, "data/Concise/Splice_branchpoints/processed/branchpointer/test/wide_data.csv")
+write_csv(dt_train_wide, "data/Splice_branchpoints/processed/branchpointer/train/wide_data.csv")
+write_csv(dt_test_wide, "data/Splice_branchpoints/processed/branchpointer/test/wide_data.csv")
 flog.info("done")
 ## DONE - extract the whole sequences - increase the range by the window size
 ## DONE - compare them with the old ones (pad + align them)

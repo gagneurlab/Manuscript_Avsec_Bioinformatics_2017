@@ -14,7 +14,7 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler, Imputer
 import pandas as pd
 from concise.preprocessing import encodeSplines
 
-dtdir = '../../../Data/RBP/iDeep/clip/'
+dtdir = '../../../Data/RBP/iDeep/raw'
 
 files = {"X_GO": "matrix_GeneOntology.tab.gz", "X_KMER": "matrix_RNAkmers.tab.gz", "X_RG": "matrix_RegionType.tab.gz",
          "X_CLIP": "matrix_Cobinding.tab.gz", "X_RNA": "matrix_RNAfold.tab.gz", "positions_nat": "positions.csv", "positions_gam": "positions.csv"}

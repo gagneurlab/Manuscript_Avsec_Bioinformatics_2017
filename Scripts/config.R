@@ -3,6 +3,7 @@
 
 ## data + convenience libraries
 library(futile.logger)
+library(tictoc)
 library(data.table)
 
 ## hadleyverse

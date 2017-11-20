@@ -2,8 +2,8 @@
 #' title: Position plots
 #'---
 
-#  input: ["data/Concise/Splice_branchpoints/processed/branchpointer/train/branchpoint_df_HCN.csv",
-#          "data/Concise/Splice_branchpoints/interpret/position/concise_shallow.csv"]
+#  input: ["data/Splice_branchpoints/processed/branchpointer/train/branchpoint_df_HCN.csv",
+#          "data/Splice_branchpoints/interpret/position/concise_shallow.csv"]
 
 DIST_FEATURES <- c("dist1" = "Donor distance",
                    "dist2" = "Acceptor distance",
@@ -17,7 +17,7 @@ DIST_FEATURES <- c("dist1" = "Donor distance",
 
 
 tidy_position_measured <- function() {
-  dt <- fread("data/Concise/Splice_branchpoints/processed/branchpointer/train/branchpoint_df_HCN.csv")
+  dt <- fread("data/Splice_branchpoints/processed/branchpointer/train/branchpoint_df_HCN.csv")
   dt[, V1:= NULL]
   dt[, is_hc := as.integer(set == "HC")]
   setnames(dt, "dist.1", "dist1")
@@ -55,7 +55,7 @@ tidy_position_inferred <- function() {
 
 
   dtpos <- lapply(methods, function(method) {
-    path <- paste0("data/Concise/Splice_branchpoints/interpret/position/", method, ".csv")
+    path <- paste0("data/Splice_branchpoints/interpret/position/", method, ".csv")
     dt <- fread(path)
     if (method %in% names(hash)) {
       dt[, method := hash[method]]    
@@ -71,7 +71,7 @@ tidy_position_inferred <- function() {
 
 
 get_position_plots <- function(show_title=TRUE, aes_str=aes_string(alpha="N")) {
-  dt <- fread("data/Concise/Splice_branchpoints/processed/branchpointer/train/branchpoint_df_HCN.csv")
+  dt <- fread("data/Splice_branchpoints/processed/branchpointer/train/branchpoint_df_HCN.csv")
   dt[, V1:= NULL]
   dt[, is_hc := as.integer(set == "HC")]
 
@@ -101,7 +101,7 @@ get_position_plots <- function(show_title=TRUE, aes_str=aes_string(alpha="N")) {
 
 
   dtpos <- lapply(methods, function(method) {
-    path <- paste0("data/Concise/Splice_branchpoints/interpret/position/", method, ".csv")
+    path <- paste0("data/Splice_branchpoints/interpret/position/", method, ".csv")
     dt <- fread(path)
     if (method %in% names(hash)) {
       dt[, method := hash[method]]    

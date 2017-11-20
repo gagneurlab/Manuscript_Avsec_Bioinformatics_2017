@@ -2,12 +2,12 @@
 #' title: Create figure 2
 #' author: Ziga Avsec
 #' wb:
-#'  input: ["data/Concise/Splice_branchpoints/processed/pr_roc/roc_curves.csv",
-#'          "data/Concise/Splice_branchpoints/processed/pr_roc/pr_curves.csv",
-#'          "data/Concise/Splice_branchpoints/processed/pr_roc/bootstrap_auc.csv",
-#'          "data/Concise/Splice_branchpoints/processed/pr_roc/bootstrap_auprc.csv"]
-#'  output: ["data/plots/Concise/Paper/fig3_roc_pr.pdf",
-#'           "data/plots/Concise/Paper/fig3_roc_pr.png"]
+#'  input: ["data/Splice_branchpoints/processed/pr_roc/roc_curves.csv",
+#'          "data/Splice_branchpoints/processed/pr_roc/pr_curves.csv",
+#'          "data/Splice_branchpoints/processed/pr_roc/bootstrap_auc.csv",
+#'          "data/Splice_branchpoints/processed/pr_roc/bootstrap_auprc.csv"]
+#'  output: ["data/plots/fig3_roc_pr.pdf",
+#'           "data/plots/fig3_roc_pr.png"]
 #'---
 #'
 #' 
@@ -18,9 +18,9 @@ plt_dir <- "~/projects-work/spline_trans/plots/subplots/fig3/"
 dir.create(plt_dir, showWarnings = FALSE)
 library(cowplot)
 library(forcats)
-source("Scripts/Concise/Paper/config.R")
+source("Scripts/Figures/config.R")
 # Get the data
-load_dir <- "data/Concise/Splice_branchpoints/processed/pr_roc/"
+load_dir <- "data/Splice_branchpoints/processed/pr_roc/"
 roc_curves <- fread(file.path(load_dir, "roc_curves.csv"))
 pr_curves <- fread(file.path(load_dir, "pr_curves.csv"))
 #' 
@@ -145,7 +145,7 @@ save_plot_mul(file.path(plt_dir, "roc_pr_boxplot"), c("pdf", "png"), plt_boxplot
 ## ------------------------------------------------------------------
 ## Plot 1
 ## requirements
-source_all(dir = "Scripts/Concise/Splice_branchpoints/plot_functions")
+source_all(dir = "Scripts/Splice_branchpoints/plot_functions")
 col_scheme_deep <- scale_colour_manual(values = c(col_concise_deep, col_relu_deep))
 col_scheme_shallow <- scale_colour_manual(values = c(col_concise_shallow,
                                                      col_relu_shallow))
@@ -159,7 +159,7 @@ dtt <- tidy_position()
 
 ## --------------------------------------------
 ## Motif plots
-basedir = "data/Concise/Splice_branchpoints/interpret/sequence/shallow_spline_trans"
+basedir = "data/Splice_branchpoints/interpret/sequence/shallow_spline_trans"
 df <- lapply(list.files(basedir, full.names=TRUE), function(f) {
   dt <- fread(f, header=FALSE)
   dt[, method := gsub("\\.txt", "", gsub("pwm_", "", basename(f)))]
@@ -201,7 +201,7 @@ save_plot(file.path(plt_dir, "motif2.pdf"), pl2,
 
 ggseqlogo(t(as.matrix(df[method == "data"][, DNA, with = F])))
 ## --------------------------------------------
-basedir = "data/Concise/Splice_branchpoints/interpret/positions/shallow_spline_trans"
+basedir = "data/Splice_branchpoints/interpret/positions/shallow_spline_trans"
 dtpos_all<- fread(file.path(basedir, "all_positions.csv"))
 setnames(dtpos_all, "outlier", "Outlier")
 dtpos_all[, primary := feature %in% c("dist2", "ppt_start", "canon_hit1", "canon_hit2")]

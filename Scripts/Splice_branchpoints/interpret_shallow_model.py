@@ -46,7 +46,7 @@ if __name__ == "__main__":
     DATA_DIR = os.path.expanduser("~/projects-work/deepcis/data/")
     EXP_NAME = "shallow_spline_trans"
     DB_NAME = "Concise__Splice_branchpoints"
-    EXP_DIR = DATA_DIR + "/Concise/Splice_branchpoints/"
+    EXP_DIR = DATA_DIR + "/Splice_branchpoints/"
     # --------------------------------------------
     print("load trials...")
     trial = CMongoTrials(DB_NAME, EXP_NAME, ip=HOST, kill_timeout=30 * 60)

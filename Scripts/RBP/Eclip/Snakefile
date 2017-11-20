@@ -20,18 +20,28 @@ RBP_SUBSET = ["UPF1", "PUM2", "DDX3X", "NKRF", "TARDBP", "SUGP2"]
 
 TRAIN_TYPES = ["train", "valid", "test"]
 POSNEG = ["pos", "neg"]
-BASE_DM = "data/eclip/processed/design_matrix/"
+PROC_DIR = "data/eclip/processed/"
+BASE_DM = PROC_DIR + "/design_matrix/"
 # all scripts
-
+POS_FEATURES = ['tss', 'polya', 'exon_intron', 'intron_exon', 'start_codon',
+                'stop_codon', 'gene_start', 'gene_end']
+POS_FEATURES_comb = ["tss,gene_start", "polya,gene_end"]
 # --------------------------------------------
 rule all:
     input:
         "data/eclip/processed/peak_center-gene_mapping_with_sequence.rds",
-        "data/eclip/processed/design_matrix/meta_info/LARP7.json",
-        expand("data/eclip/processed/design_matrix/predictive_models/{eclip_model_script}/{rbp_name}-{position_type}.rds",
+        BASE_DM + "/meta_info/LARP7.json",
+        expand(BASE_DM + "/predictive_models/{eclip_model_script}/{rbp_name}-{position_type}.rds",
                eclip_model_script=ECLIP_MODEL_SCRIPTS,
                position_type=["w_position", "no_position"],
-               rbp_name=RBP_SUBSET)
+               rbp_name=RBP_SUBSET),
+        expand(BASE_DM + "/{train_types}/{rbp_name}_extended.csv",
+               rbp_name=RBPS, train_types=TRAIN_TYPES),
+        expand(PROC_DIR + "/feature_exclusion_exp/results/{rbp_name}/{exp}-excl-{fset}.json",
+               rbp_name=RBPS[:2],
+               exp=["DeepNN_scalar_position_ext_gam"],
+               fset=POS_FEATURES + POS_FEATURES_comb
+               )
 
 # read raw data, clean and generate negative sequences
 rule process_raw_data:
@@ -98,3 +108,15 @@ rule train_predictive_models:
         PROC_DIR + "/predictions/{rbp_name}/{eclip_model_script}-{position_type}.csv"
     shell:
         "{input.rscript} {wildcards.rbp_name} {wildcards.position_type}"
+
+
+rule train_exclude_features:
+    input:
+        BASE_DM + "/train/{rbp_name}_extended.csv",
+        BASE_DM + "/valid/{rbp_name}_extended.csv",
+        BASE_DM + "/test/{rbp_name}_extended.csv",
+        pyscript = SRC + "predictive_models/train_exclude_features.py"
+    output:
+        PROC_DIR + "/feature_exclusion_exp/results/{rbp_name}/{exp}-excl-{fset}.json"
+    shell:
+        "python {input.pyscript} --rbp={wildcards.rbp_name} --feature_set={wildcards.fset} --exp={wildcards.exp}"

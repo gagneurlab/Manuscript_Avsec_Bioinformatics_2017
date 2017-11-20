@@ -1087,3 +1087,10 @@ fread_multiple <- function(path_vec, colname = "fold", fold_names = NULL, ...) {
 sort_by_prevalance <- function(f) {
   names(sort(table(f),decreasing=TRUE))
 }
+
+
+#' Omit NULL values from a list
+omit_null <- function(x) {
+  stopifnot(is.list(x))
+  x[!sapply(x, is.null)]
+}

@@ -11,14 +11,17 @@ See the following repository:
 
 # Start hyper-parameter tuning with hyperopt
 
-Start workers and run train.py
+Start workers see [concise hyopt documentation](https://i12g-gagneurweb.in.tum.de/project/concise/hyopt/) and run `train.py`.
 
 # Post-process:
 
 Run:
-- python postprocess.py
-- python interpret_shallow_model.py
-- Rscript 3_bootstrap_predictions.R
+
+```bash
+python postprocess.py
+python interpret_shallow_model.py
+Rscript 3_bootstrap_predictions.R
+```
 
 # Plot
 

@@ -84,18 +84,22 @@ list_dt_kmer <- lapply(k_vec, function(k) {
   lapply(alpha_vec, function(alpha) {
     message("k = ", k, ", alpha = ", alpha)
     res <- tryCatch({
+      tic()
       cv_fit <- cv.glmnet(X_train, y_train,
                           family = "binomial",
                           alpha = alpha,
                           standardize = FALSE, intercept = TRUE,
                           type.measure = "auc", nfolds = 10)
       auc_valid <- auc(y_valid, predict(cv_fit, newx = X_valid, s = "lambda.min", type = "response")[,1])
+      time = toc()
+      elapsed = time$toc - time$tic
       res <- data.table(auc= auc_valid,
                         auc_cv_train = cv.glmnet_best_perf(cv_fit)[1],
                         auc_cv_train_sd = cv.glmnet_best_perf(cv_fit)[2],
                         lambda = cv_fit$lambda.min,
                         alpha = alpha,
-                        k = k
+                        k = k,
+                        training_time = elapsed
                         )
       gc()
       ## get global model
@@ -117,7 +121,7 @@ list_dt_kmer <- lapply(k_vec, function(k) {
 
 ## remove NULL values
 failed <- sapply(list_dt_kmer, is.null)
-if (sum(failed)>0) flog.warning(paste0("Number of failed jobs: ",
+if (sum(failed)>0) flog.warn(paste0("Number of failed jobs: ",
                                        sum(failed), "/", length(failed)))
 list_dt_kmer <- list_dt_kmer[!failed]
 flog.info("Predict for test data")
@@ -127,6 +131,7 @@ dt_kmer <- list_dt_kmer %>% lapply(function(x) x$res) %>% rbindlist
 best_model <- list_dt_kmer[[which.max(dt_kmer$auc)]]
 model_obj <- best_model$final_model
 param <- best_model$res %>% as.list %>% .[c("k", "alpha", "lambda")]
+execution_time <- best_model$res$training_time
 valid_performance <- best_model$res %>% as.list %>% .[["auc"]]
 ## test performance
 X_test <- dt_test[, get_kmers_X(get(info$sequence), param$k)] %>% Matrix(sparse = TRUE) 
@@ -149,6 +154,7 @@ all_kmers <- list(
     test_performance = test_performance,
     test_performance_roc = test_performance_roc,
     dt_pred = dt_pred_best,
+    execution_time = execution_time,
     model_obj = model_obj
   ),
   validation_performance_table = dt_kmer

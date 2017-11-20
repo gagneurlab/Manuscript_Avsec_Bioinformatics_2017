@@ -28,7 +28,7 @@ sns.set(style="whitegrid", color_codes=True)
 
 DB_NAME = "Concise__Splice_branchpoints"
 DATA_DIR = os.path.expanduser("~/projects-work/deepcis/data/")
-EXP_DIR = DATA_DIR + "/Concise/Splice_branchpoints/"
+EXP_DIR = DATA_DIR + "/Splice_branchpoints/"
 
 HOST = "ouga03"
 

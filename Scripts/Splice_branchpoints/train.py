@@ -9,6 +9,7 @@ import numpy as np
 import data
 import model
 
+
 def print_exp(exp_name):
     print("-" * 40 + "\nexp_name: " + exp_name)
 
@@ -258,6 +259,43 @@ hyper_params = {
 }
 
 # test_fn(fn, hyper_params, n_train=1000)
+trials = CMongoTrials(DB_NAME, exp_name, kill_timeout=30 * 60)
+best = fmin(fn, hyper_params, trials=trials, algo=tpe.suggest, max_evals=1000)
+print("best_parameters: " + str(best))
+
+# ------------------------
+exp_name = "model_deep_seqonly"
+print_exp(exp_name)
+# -----
+fn = CompileFN(DB_NAME, exp_name,
+               data_fn=data.data,
+               model_fn=model.model,
+               add_eval_metrics=["auprc", "auc"],
+               loss_metric="auprc",
+               loss_metric_mode="max",
+               use_tensorboard=False,
+               valid_split=0.2,
+               random_state=100)
+
+hyper_params = {
+    "data": {"pos_class_weight": 2.0,
+             "truncate": False,  # we haven't used truncate either in model_deep_position
+             "encode_splines": False,
+             "minmax_scale": True,
+             },
+    "model": {"nonlinearity": "relu",
+              "filters": 15 * 2**hp.randint("filters", 5),
+              "init_motifs": None,
+              "pos_effect": None,
+              "lr": hp.loguniform("m_lr", np.log(1e-4), np.log(0.005)),
+              },
+    "fit": {"epochs": 150,
+            "patience": 4,
+            "batch_size": 128,
+            }
+}
+
+test_fn(fn, hyper_params, n_train=1000)
 trials = CMongoTrials(DB_NAME, exp_name, kill_timeout=30 * 60)
 best = fmin(fn, hyper_params, trials=trials, algo=tpe.suggest, max_evals=1000)
 print("best_parameters: " + str(best))

@@ -2,18 +2,18 @@
 #' title: Bootstrap performance
 #' author: Ziga Avsec
 #' wb:
-#'  input: ["data/Concise/Splice_branchpoints/test_predictions/branchpointer.csv",
-#'          "data/Concise/Splice_branchpoints/test_predictions/glmnet.csv",
-#'          "data/Concise/Splice_branchpoints/test_predictions/concise_deep.csv",
-#'          "data/Concise/Splice_branchpoints/test_predictions/concise_shallow.csv"]
-#'  output: ["data/plots/Concise/Splice_branchpoints/roc_pr.pdf",
-#'           "data/plots/Concise/Splice_branchpoints/roc_pr.png",
-#'           "data/Concise/Splice_branchpoints/processed/pr_roc/roc_curves.csv",
-#'           "data/Concise/Splice_branchpoints/processed/pr_roc/pr_curves.csv",
-#'           "data/Concise/Splice_branchpoints/processed/pr_roc/bootstrap_auc.csv",
-#'           "data/Concise/Splice_branchpoints/processed/pr_roc/bootstrap_auprc.csv"]
+#'  input: ["data/Splice_branchpoints/test_predictions/branchpointer.csv",
+#'          "data/Splice_branchpoints/test_predictions/glmnet.csv",
+#'          "data/Splice_branchpoints/test_predictions/concise_deep.csv",
+#'          "data/Splice_branchpoints/test_predictions/concise_shallow.csv"]
+#'  output: ["data/plots/Splice_branchpoints/roc_pr.pdf",
+#'           "data/plots/Splice_branchpoints/roc_pr.png",
+#'           "data/Splice_branchpoints/processed/pr_roc/roc_curves.csv",
+#'           "data/Splice_branchpoints/processed/pr_roc/pr_curves.csv",
+#'           "data/Splice_branchpoints/processed/pr_roc/bootstrap_auc.csv",
+#'           "data/Splice_branchpoints/processed/pr_roc/bootstrap_auprc.csv"]
 #'---
-source("Scripts/Concise/Splice_branchpoints/config.R")
+source("Scripts/Splice_branchpoints/config.R")
 read_csv_pred <- function(file) {
   dt <- fread(file)
   if ("V1" %in% names(dt)) {
@@ -46,7 +46,7 @@ pred_csv2dt_pr<- function(file) {
 }
 
 
-files <- list.files("data/Concise/Splice_branchpoints/test_predictions/", full.names=T)
+files <- list.files("data/Splice_branchpoints/test_predictions/", full.names=T)
 files <- files[!grepl("gam_0|_mul_", files)]
 
 ## ---------------------------------
@@ -79,7 +79,7 @@ dtp_b_auprc %>% setnames("V1", "auprc")
 roc_curves <- lapply(files, pred_csv2dt_roc) %>% rbindlist
 pr_curves <- lapply(files, pred_csv2dt_pr) %>% rbindlist
 
-save_dir <- "data/Concise/Splice_branchpoints/processed/pr_roc/"
+save_dir <- "data/Splice_branchpoints/processed/pr_roc/"
 write_csv(roc_curves, file.path(save_dir, "roc_curves.csv"))
 write_csv(pr_curves, file.path(save_dir, "pr_curves.csv"))
 

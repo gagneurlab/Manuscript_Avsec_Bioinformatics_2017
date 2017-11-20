@@ -7,6 +7,7 @@
 get_human_anno <- function(only_regular_chr = TRUE, only_protein_coding = TRUE, version = "hg19") {
   ## anno <- import(gff_file)
   if (version == "hg19") {
+    ## rds version of the gtf file: gtf <- import(); saveRDS(gtf), ...
     rds_gff_file <- "/s/genomes/human/hg19/gencode/gencode.v24lift37.annotation.rds"
   } else if (version == "hg38") {
     ## use GRCh38.p7 - corresponds to gencode v25
