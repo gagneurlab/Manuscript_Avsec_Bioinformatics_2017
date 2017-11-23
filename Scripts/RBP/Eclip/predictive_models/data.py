@@ -15,7 +15,7 @@ from joblib import Memory
 import os
 
 # TODO - update this path
-DIR_ROOT = os.path.expanduser("~/projects-work/code_spline_trans/data/eclip/")
+DIR_ROOT = os.path.expanduser("~/projects-work/code_spline_trans_old/data/eclip/")
 CACHE_DIR = DIR_ROOT + "cache/"
 
 memory = Memory(cachedir=CACHE_DIR, verbose=0, mmap_mode='r')
