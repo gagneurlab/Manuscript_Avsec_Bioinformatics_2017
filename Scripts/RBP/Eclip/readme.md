@@ -55,16 +55,13 @@ for i in {1..20}; do sbatch <path>/hyperopt_worker.bash; done
 
 ### Start hyper-param optimization main script
 
-Only for 6 RBP's and 3 different methods (maybe a few hours with 20 workers in parallel):
-```{bash}
-./train_subset_start-end.py
-```
-
-For all 112 RBP's (this might take a few days running 20 workers in parallel):
+All the experiments utilizing DNN's were done through hyperopt. To start the master, run
 
 ```{bash}
 ./train_all.py
 ```
+
+Note that the this might take a few days with 20 workers in parallel on 4 CPU threads each.:
 
 After everything is done, you can check how many trials were actually done for a particular experiment and RBP (sanity check if anything crashed):
 
@@ -84,8 +81,20 @@ Retrieve the test-set predictions for the best model from each experiment:
 ./get_predictions.py
 ```
 
+This will save the csv file of predictions with columns `y_true,y_pred` to `data/eclip/processed/predictions/{rbp}/{method}.csv`.
+
 Note: you might have to edit the `HOST` variable.
+
+### Score new sequences
+
+The best models were saved to: `data/eclip/models`. To score your own sequences for binding affinities, use: TODO 
 
 ## Plot
 
 Now, you can run `Scripts/Figures/Fig2.R` to reproduce Figure 2.
+
+## TODO
+
+- [ ] add the best models to `data/eclip/models`
+- [ ] run `dump_best_models.py` - to save all the best models
+- [ ] add scoring your own sequences
