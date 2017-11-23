@@ -11,7 +11,7 @@ from shutil import copyfile
 from glob import glob
 from concise.hyopt import CMongoTrials, get_data
 import os
-from train_all import DIR_ROOT, PROC_DIR, RBP_LIST, RBP_ALL, RBP_rerun, DB_NAME, HOST
+from train_all import DIR_ROOT, PROC_DIR, RBP_LIST, RBP_ALL, DB_NAME, HOST
 import logging
 import argparse
 from pprint import pprint
@@ -32,7 +32,7 @@ def get_trials(exp_name, rbp):
 def get_models_overall(exp_name, rbp, ignore_cache=False):
     print_exp(exp_name, rbp)
 
-    basedir = "{root}/processed/models/{rbp}/".format(root=DIR_ROOT, rbp=rbp)
+    basedir = "{root}/models/{rbp}/".format(root=DIR_ROOT, rbp=rbp)
     out_h5 = basedir + "{method}.h5".format(method=exp_name)
     if not os.path.exists(basedir):
         os.makedirs(basedir)
