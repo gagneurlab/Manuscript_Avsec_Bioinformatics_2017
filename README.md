@@ -27,10 +27,9 @@ source("https://bioconductor.org/biocLite.R")
 sapply(readLines("r_bioc_packages.txt"), biocLite)
 ```
 
-
 ## General repository organization notes
 
-In each experiment folder, the main files are:
+In each experiment folder training predictive models, the main files are:
 
 - readme.md - contains further instructions
 - data.py - contains a `data()` function returning a tuple of train and test-set arrays
@@ -39,10 +38,19 @@ In each experiment folder, the main files are:
 
 R should be started from the repository root.
 
-## Code for producing the plots
+All data are located either in `Data` (smaller clip data) or in `data/` (everything else).
 
-Is located at `Scripts/Figures/`.
+## Download the data
 
-## TODO
+To download the rest of the data not conained in the repository, run:
 
-- [ ] add the intermediary pre-processed datasets
+```bash
+wget https://i12g-gagneurweb.in.tum.de/public/paper/Avsec_Bioinformatics_2017/data.tar.gz
+tar xvfz data.tar.gz
+```
+
+`data/` includes intermediary results, trained models, as well as model training/test datasets.
+
+## Support
+
+Let me know if you have any problems by creating an issue or sending me an email to avsec-at-in.tum.de.
