@@ -42,7 +42,7 @@ All data are located either in `Data` (smaller clip data) or in `data/` (everyth
 
 ## Download the data
 
-To download the rest of the data not conained in the repository, run:
+To download the rest of the data not contained in the repository, run:
 
 ```bash
 wget https://i12g-gagneurweb.in.tum.de/public/paper/Avsec_Bioinformatics_2017/data.tar.gz
