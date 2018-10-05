@@ -7,7 +7,7 @@ Run: snakemake
 workdir:
     "../../../"
 
-
+import os
 SRC = "Scripts/RBP/Eclip/"
 ECLIP_MODEL_SCRIPTS = ["kmer_glmnet"]
 
@@ -20,8 +20,8 @@ RBP_SUBSET = ["UPF1", "PUM2", "DDX3X", "NKRF", "TARDBP", "SUGP2"]
 
 TRAIN_TYPES = ["train", "valid", "test"]
 POSNEG = ["pos", "neg"]
-PROC_DIR = "data/eclip/processed/"
-BASE_DM = PROC_DIR + "/design_matrix/"
+PROC_DIR = "data/eclip/processed"
+BASE_DM = os.path.join(PROC_DIR, "design_matrix")
 # all scripts
 POS_FEATURES = ['tss', 'polya', 'exon_intron', 'intron_exon', 'start_codon',
                 'stop_codon', 'gene_start', 'gene_end']
