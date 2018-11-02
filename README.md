@@ -14,13 +14,15 @@ pip install -r python3_requirements.txt
 
 ### R
 
-Normal R packages
+Start R using: `R --vanilla`.
+
+Install CRAN R packages:
 
 ```{r}
 install.packages(readLines("r_packages.txt"))
 ```
 
-Bioconductor packages
+Install Bioconductor packages:
 
 ```{r}
 source("https://bioconductor.org/biocLite.R")
