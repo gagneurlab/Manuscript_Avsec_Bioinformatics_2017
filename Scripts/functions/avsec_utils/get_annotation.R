@@ -124,7 +124,7 @@ get_human_anno <- function(only_regular_chr = TRUE, use_mito=FALSE, only_protein
     rds_gff_file <- "/s/genomes/human/hg19/gencode/gencode.v24lift37.annotation.rds"
   } else if (version == "hg38") {
     ## use GRCh38.p7 - corresponds to gencode v25
-    rds_gff_file <- "/s/genomes/human/hg38/GRCh38.p7/gencode.v25.annotation.gtf.rds"
+    rds_gff_file <- "fasta/gencode.v25.annotation.gtf.rds"
   } else {
     stop("Invalid version")
   }
@@ -153,7 +153,7 @@ get_human_fasta <- function(version = "hg19") {
     fafile <- "/s/genomes/human/hg19/fasta/hg19.fa"
   } else if (version == "hg38"){
     ## use GRCh38.p7 - corresponds to gencode v25
-    fafile <- "/s/genomes/human/hg38/GRCh38.p7/GRCh38.p7.genome.fa"
+    fafile <- "fasta/GRCh38.p7.genome.fa"
   } else {
     stop("Invalid version")
   }
