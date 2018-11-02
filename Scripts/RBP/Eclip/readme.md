@@ -24,6 +24,16 @@ xargs -n 1 curl -O -L < files.txt
 gunzip *.gz
 ```
 
+### Download the fasta files
+The `Snakefile` requires also two additional files, `gencode.v25.annotation.gtf.rds` and `GRCh38.p7.genome.fa`.
+```{bash}
+cd ../../..
+mkdir -p fasta/
+wget ftp://ftp.ensembl.org/pub/release-94/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.toplevel.fa.gz
+mv -f Homo_sapiens.GRCh38.dna.toplevel.fa.gz GRCh38.p7.genome.fa
+wget https://github.com/gagneurlab/Manuscript_Avsec_Bioinformatics_2017/files/2484555/gencode.v25.annotation.gtf.zip
+```
+
 ### Pre-process
 
 From the `Scripts/RBP/Eclip` directory run:
