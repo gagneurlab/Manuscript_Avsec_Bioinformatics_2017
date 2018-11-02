@@ -49,7 +49,7 @@ rule process_raw_data:
     input:
         "data/eclip/raw/metadata.tsv",
         "fasta/gencode.v25.annotation.gtf.rds",
-        "fasta7/GRCh38.p7.genome.fa",
+        "fasta/GRCh38.p7.genome.fa",
         SRC + "0_match_peaks_genes.R"
     output:
         "data/eclip/processed/protein_peak_overlaps.rds",
