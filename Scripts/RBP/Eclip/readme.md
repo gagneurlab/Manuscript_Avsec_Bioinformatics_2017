@@ -37,6 +37,12 @@ unzip *.zip
 rm *.zip
 ```
 
+### Install R packages
+From the root of the repository run `R --vanilla` and afterwards execute:
+```{R}
+install.packages(readLines("r_packages.txt"))
+```
+
 ### Pre-process
 
 From the `Scripts/RBP/Eclip` directory run:
