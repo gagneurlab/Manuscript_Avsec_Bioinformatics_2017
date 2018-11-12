@@ -23,8 +23,8 @@ def clear_directory_chromosomes(directory: str, target: str = "chrUn_"):
     [
         clear_file_chromosomes(
             "{directory}/{file}".format(directory=directory, file=file),
-            target) for file in tqdm(next(os.walk(path))[2]) if file.endswith(".tab")
+            target) for file in tqdm(next(os.walk(directory))[2]) if file.endswith(".tab")
     ]
     
-if __name__ == __main__:
+if __name__ == '__main__':
     clear_directory_chromosomes("../../../data/eclip/raw")
