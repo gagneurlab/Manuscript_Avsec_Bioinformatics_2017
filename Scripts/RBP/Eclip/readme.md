@@ -37,6 +37,12 @@ unzip *.zip
 rm *.zip
 ```
 
+## Removing `chrUn_*` sequences from tab files
+Just execute the following python script:
+```py
+python clear_tab_files.py
+```
+
 ### Install R packages
 From the root of the repository run `R --vanilla` and afterwards execute:
 ```{R}
