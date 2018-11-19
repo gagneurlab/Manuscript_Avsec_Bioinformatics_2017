@@ -34,7 +34,9 @@ wget ftp://ftp.ensembl.org/pub/release-94/fasta/homo_sapiens/dna/Homo_sapiens.GR
 mv -f Homo_sapiens.GRCh38.dna.toplevel.fa.gz GRCh38.p7.genome.fa
 wget https://github.com/gagneurlab/Manuscript_Avsec_Bioinformatics_2017/files/2484555/gencode.v25.annotation.gtf.zip
 unzip *.zip
+gunzip *.gz
 rm *.zip
+rm *.gz
 ```
 
 ## Removing `chrUn_*` sequences from tab files
