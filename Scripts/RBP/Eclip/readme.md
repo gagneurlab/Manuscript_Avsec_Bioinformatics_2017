@@ -26,6 +26,7 @@ cd data/eclip/raw
 rm metadata.tsv
 wget https://github.com/gagneurlab/Manuscript_Avsec_Bioinformatics_2017/files/2447032/metadata.tsv.zip
 unzip *.zip
+rm metadata.tsv.zip 
 ```
 
 ### Download all the encode data
