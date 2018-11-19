@@ -11,15 +11,28 @@ Final result of the pipeline are the following files:
 
 
 ## Pre-process eCLIP data
+From the repository root run:
+
+### Creating the directories
+```sh
+mkdir -p data/eclip/raw
+cp Scripts/RBP/Eclip/files.txt data/eclip/raw/
+cd data/eclip/raw
+```
+
+### Download (if desired) the old metadata file to reproduce original results
+
+```sh
+rm metadata.tsv
+wget https://github.com/gagneurlab/Manuscript_Avsec_Bioinformatics_2017/files/2447032/metadata.tsv.zip
+unzip *.zip
+```
 
 ### Download all the encode data
 
 From the repository root run:
 
 ```{bash}
-mkdir -p data/eclip/raw
-cp Scripts/RBP/Eclip/files.txt data/eclip/raw/
-cd data/eclip/raw
 xargs -n 1 curl -O -L < files.txt
 gunzip *.gz
 ```
