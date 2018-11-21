@@ -78,20 +78,20 @@ print("Requiring simdna==0.2, as it is no longer available on pipy.")
 if not os.path.exists(simdna_path): 
     downloader(("./", simdna_url))
 print("Please run from a terminal in this directory the following:\n")
-print("\033[1m  pip install -e {simdna_path}  \033[0m".format(simdna_path=simdna_path))
+print("\033[1m  pip install -e {simdna_path}  \033[0m\n".format(simdna_path=simdna_path))
 input("When done, press any key to continue... ")
 shutil.rmtree(simdna_path)
 
 
 print("Now we proceed to install the required python packages.")
 print("Please run from a terminal in this directory the following:\n")
-print("\033[1m  pip install -r {pip_requirements}  \033[0m".format(pip_requirements=pip_requirements))
+print("\033[1m  pip install -r {pip_requirements}  \033[0m\n".format(pip_requirements=pip_requirements))
 input("When done, press any key to continue... ")
 
 
 print("Now we proceed to install the required R packages.")
 print("Please run from a terminal in this directory the following:\n")
-print("\033[1m Rscript {r_installer} \033[0m".format(r_installer=r_installer))
+print("\033[1m Rscript {r_installer} \033[0m\n".format(r_installer=r_installer))
 input("When done, press any key to continue... ")
 
 
@@ -113,18 +113,18 @@ if os.path.exists(metadata_path):
 downloader((raw_path, metadata_url), multithread=False)
 
 
-print("Downloading fasta.")
+print("Downloading and extracting human genome fasta.")
 Path(fasta_path).mkdir(parents=True, exist_ok=True)
 downloader((fasta_path, fasta_url), multithread=False)
 
 
 shutil.move("{fasta_path}/{expected_fasta_name}".format(
     fasta_path=fasta_path,
-    expected_fasta_name=fasta_url.split("/")[-1]
+    expected_fasta_name=".".join(fasta_url.split("/")[-1].split(".")[:-1])
 ), target_fasta)
 
 
-print("Downloading annotations.")
+print("Downloading genome annotations.")
 downloader((fasta_path, annotations_url), multithread=False)
 
 
