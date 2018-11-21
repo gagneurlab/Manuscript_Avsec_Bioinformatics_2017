@@ -31,14 +31,14 @@ def downloader(task, multithread=True):
             file_path.split(".")[:-1])):
         r = requests.get(url, stream=True)
         total_size = int(r.headers.get('content-length', 0))
-        block_size = 8*1024
+        block_size = 1024**2
         wrote = 0
         with open(file_path, 'wb') as f:
             for data in tqdm(
                     r.iter_content(block_size),
                     disable=multithread,
                     total=math.ceil(total_size // block_size),
-                    unit='KB',
+                    unit='MB',
                     leave=False,
                     unit_scale=True):
                 wrote = wrote + len(data)
