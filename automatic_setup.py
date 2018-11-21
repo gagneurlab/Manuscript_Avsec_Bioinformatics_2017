@@ -36,6 +36,7 @@ def downloader(task, multithread=True):
         with open(file_path, 'wb') as f:
             for data in tqdm(
                     r.iter_content(block_size),
+                    disable=multithread,
                     total=math.ceil(total_size // block_size),
                     unit='KB',
                     leave=False,
