@@ -74,8 +74,8 @@ if not os.path.exists(path):
 
 
 print("Requiring simdna==0.2, as it is no longer available on pipy.")
-if not os.path.exists(simdna_path): 
-    downloader(("./", simbda_url))
+if not os.path.exists(simdna_url): 
+    downloader(("./", simdna_url))
 print("Please run from a terminal in this directory the following:\n")
 print("\033[1m  pip install -e {simdna_path}  \033[0m".format(simdna_path=simdna_path))
 input("When done, press any key to continue... ")
