@@ -233,7 +233,7 @@ reverseComplement_char <- function(seq) {
 ##' You have to wrap `Views(seq[[chr]],ranges(gr_list[[chr]]))` with `DNAStringSet`
 easy_Views <- function(seq, gr, reverse_seq = TRUE, colname = "seq") {
   gr_list <- split(gr, seqnames(gr))
-
+  names(seq) <- paste("chr", names(seq), sep='')
   gr_list <- lapply(intersect(names(seq),names(gr_list)) , function(chr) {
     gr_tmp <- gr_list[[chr]]
     v <- Views(seq[[chr]],ranges(gr_list[[chr]]))
