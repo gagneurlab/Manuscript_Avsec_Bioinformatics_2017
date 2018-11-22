@@ -5,6 +5,8 @@
 - get validation accuracies
 """
 import os
+import matplotlib
+matplotlib.use('agg')
 import matplotlib.pyplot as plt
 from concise.hyopt import CompileFN, CMongoTrials, test_fn
 import numpy as np
