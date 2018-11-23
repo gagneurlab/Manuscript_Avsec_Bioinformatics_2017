@@ -5,3 +5,4 @@ keras>=2.0
 concise==0.6.0.0
 tensorflow
 snakemake
+joblib
