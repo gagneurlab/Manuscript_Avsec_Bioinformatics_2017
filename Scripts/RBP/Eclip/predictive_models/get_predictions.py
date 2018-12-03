@@ -11,7 +11,7 @@ from glob import glob
 from concise.hyopt import CMongoTrials, get_data
 import os
 from train_all import DIR_ROOT, PROC_DIR, RBP_LIST, RBP_ALL, RBP_rerun, DB_NAME
-from .mongodb_setup import host, port
+from mongodb_setup import host, port
 import logging
 import argparse
 from pprint import pprint

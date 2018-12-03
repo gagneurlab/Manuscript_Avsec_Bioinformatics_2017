@@ -11,7 +11,7 @@ from concise.hyopt import (CMongoTrials, _train_and_eval_single,
                            get_model, get_data)
 # project code
 from train_all import DB_NAME, PROC_DIR, POS_FEATURES, DIR_ROOT
-from .mongodb_setup import host, port
+from mongodb_setup import host, port
 from helper import get_logger
 import data
 import model

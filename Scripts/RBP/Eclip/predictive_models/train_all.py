@@ -12,7 +12,7 @@ import os
 import data
 import model
 from joblib import Parallel, delayed
-from .mongodb_setup import host, port
+from mongodb_setup import host, port
 import argparse
 from concise.hyopt import CompileFN, CMongoTrials, test_fn
 
