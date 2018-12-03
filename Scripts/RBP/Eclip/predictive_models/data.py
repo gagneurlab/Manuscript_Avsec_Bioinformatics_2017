@@ -15,7 +15,7 @@ from joblib import Memory
 import os
 
 # TODO - update this path
-DIR_ROOT = os.path.expanduser("~/projects-work/code_spline_trans_old/data/eclip/")
+DIR_ROOT = os.path.expanduser("../../../../data/eclip/")
 CACHE_DIR = DIR_ROOT + "cache/"
 
 memory = Memory(cachedir=CACHE_DIR, verbose=0, mmap_mode='r')
@@ -105,14 +105,16 @@ def data_extended(rbp_name, n_bases=10,
     """
     pos_class_weight: positive class weight
     """
-    dt_train, dt_valid, dt_test = data_split(rbp_name + "_extended", valid_chr, test_chr)
+    dt_train, dt_valid, dt_test = data_split(
+        rbp_name + "_extended", valid_chr, test_chr)
 
     seq_train = encodeDNA(dt_train.seq.tolist())
     seq_valid = encodeDNA(dt_valid.seq.tolist())
     seq_test = encodeDNA(dt_test.seq.tolist())
 
     seq_length = seq_train.shape[1]
-    # impute missing values (not part of the pipeline as the Imputer lacks inverse_transform method)
+    # impute missing values (not part of the pipeline as the Imputer lacks
+    # inverse_transform method)
     imp = Imputer(strategy="median")
     imp.fit(pd.concat([dt_train[POS_FEATURES], dt_valid[POS_FEATURES]]))
     dt_train[POS_FEATURES] = imp.transform(dt_train[POS_FEATURES])
@@ -152,9 +154,12 @@ def data_extended(rbp_name, n_bases=10,
         return np.transpose(arr, (0, 2, 1))
 
     if pos_as_track:
-        dtx_train = melt_array(expand_positions(dtx_train, seq_length), seq_length)
-        dtx_valid = melt_array(expand_positions(dtx_valid, seq_length), seq_length)
-        dtx_test = melt_array(expand_positions(dtx_test, seq_length), seq_length)
+        dtx_train = melt_array(expand_positions(
+            dtx_train, seq_length), seq_length)
+        dtx_valid = melt_array(expand_positions(
+            dtx_valid, seq_length), seq_length)
+        dtx_test = melt_array(expand_positions(
+            dtx_test, seq_length), seq_length)
 
     # transform pos features
     preproc_pipeline.fit(np.concatenate([dtx_train, dtx_valid]))
@@ -178,7 +183,8 @@ def data_extended(rbp_name, n_bases=10,
         # (batch, seq_length / 1, default number of splines)
 
         # add also the merged version - last dimension = features
-        raw_dist_all = np.concatenate([raw_dist["raw_dist_" + k] for k in POS_FEATURES], axis=-1)
+        raw_dist_all = np.concatenate(
+            [raw_dist["raw_dist_" + k] for k in POS_FEATURES], axis=-1)
         # (batch, seq_length / 1, n_features)
 
         return {**raw_dist, **dist, **{"raw_dist_all": raw_dist_all}}
@@ -239,12 +245,15 @@ def data(rbp_name, n_bases=10,
         # 1. create a matrix with incrementing positions
         incr_array = np.arange(pos_length) - pos_length // 2
         # expand to have the same shape as x
-        positions_offset = np.repeat(incr_array.reshape((1, -1)), x.shape[0], axis=0)
+        positions_offset = np.repeat(
+            incr_array.reshape((1, -1)), x.shape[0], axis=0)
         return positions_offset + x
 
     if pos_as_track:
-        tss_dist = {k: expand_positions(v, pos_length) for k, v in tss_dist.items()}
-        polya_dist = {k: expand_positions(v, pos_length) for k, v in polya_dist.items()}
+        tss_dist = {k: expand_positions(v, pos_length)
+                    for k, v in tss_dist.items()}
+        polya_dist = {k: expand_positions(v, pos_length)
+                      for k, v in polya_dist.items()}
         shift = pos_length // 2 + 2
     else:
         tss_dist = {k: v[:, np.newaxis] for k, v in tss_dist.items()}
