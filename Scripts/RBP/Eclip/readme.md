@@ -11,17 +11,58 @@ Final result of the pipeline are the following files:
 
 
 ## Pre-process eCLIP data
+From the repository root run:
+
+### Creating the directories
+```sh
+mkdir -p data/eclip/raw
+cp Scripts/RBP/Eclip/files.txt data/eclip/raw/
+cd data/eclip/raw
+```
+
+### Download (if desired) the old metadata file to reproduce original results
+
+```sh
+rm metadata.tsv
+wget https://github.com/gagneurlab/Manuscript_Avsec_Bioinformatics_2017/files/2447032/metadata.tsv.zip
+unzip *.zip
+rm metadata.tsv.zip 
+```
 
 ### Download all the encode data
 
 From the repository root run:
 
 ```{bash}
-mkdir -p data/eclip/raw
-cp Scripts/RBP/Eclip/files.txt data/eclip/raw/
-cd data/eclip/raw
 xargs -n 1 curl -O -L < files.txt
 gunzip *.gz
+```
+
+### Download the fasta files
+The `Snakefile` requires also two additional files, `gencode.v25.annotation.gtf.rds` and `GRCh38.p7.genome.fa`.
+```{bash}
+cd ../../..
+mkdir -p fasta/
+cd fasta
+wget ftp://ftp.ensembl.org/pub/release-94/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.toplevel.fa.gz
+gunzip *.gz
+mv -f Homo_sapiens.GRCh38.dna.toplevel.fa GRCh38.p7.genome.fa
+wget https://github.com/gagneurlab/Manuscript_Avsec_Bioinformatics_2017/files/2484555/gencode.v25.annotation.gtf.zip
+unzip *.zip
+rm *.zip
+rm *.gz
+```
+
+## Removing `chrUn_*` sequences from tab files
+Just execute the following python script:
+```py
+python clear_tab_files.py
+```
+
+### Install R packages
+From the root of the repository run `R --vanilla` and afterwards execute:
+```{R}
+install.packages(readLines("r_packages.txt"))
 ```
 
 ### Pre-process
