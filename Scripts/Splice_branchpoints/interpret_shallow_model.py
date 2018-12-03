@@ -8,6 +8,7 @@ import pandas as pd
 from concise.utils.model_data import split_train_test_idx, subset
 from keras.models import Model
 import data
+from ..Eclip.precictive_models.mongodb_setup import host, port
 from copy import deepcopy
 from helper import plot_pos_dep, logit
 
@@ -42,14 +43,14 @@ if __name__ == "__main__":
 
     # --------------------------------------------
     # config
-    HOST = "ouga03"
     DATA_DIR = os.path.expanduser("~/projects-work/deepcis/data/")
     EXP_NAME = "shallow_spline_trans"
     DB_NAME = "Concise__Splice_branchpoints"
     EXP_DIR = DATA_DIR + "/Splice_branchpoints/"
     # --------------------------------------------
     print("load trials...")
-    trial = CMongoTrials(DB_NAME, EXP_NAME, ip=HOST, kill_timeout=30 * 60)
+    trial = CMongoTrials(DB_NAME, EXP_NAME, ip=host,
+                         kill_timeout=30 * 60, port=port)
     tid = trial.best_trial_tid()
     m = trial.load_model(tid)
     param = trial.get_param(tid)
@@ -70,7 +71,8 @@ if __name__ == "__main__":
 
     # Get the measured values
     print("get measured values...")
-    dt = pd.read_csv(EXP_DIR + "/processed/branchpointer/train/branchpoint_df_HCN.csv")
+    dt = pd.read_csv(
+        EXP_DIR + "/processed/branchpointer/train/branchpoint_df_HCN.csv")
     dt = dt.rename(columns={"dist.1": "dist1", "dist.2": "dist2"})
     pos_features = ['dist1', 'dist2',
                     'ppt_start', 'ppt_run_length',
@@ -80,9 +82,11 @@ if __name__ == "__main__":
     dtm = pd.melt(dt, id_vars="set", value_vars=pos_features)
 
     dtm.set = dtm.set == "HC"
-    dtmg = dtm.groupby(["variable", "value"]).agg([np.mean, "count"])["set"].reset_index()
+    dtmg = dtm.groupby(["variable", "value"]).agg(
+        [np.mean, "count"])["set"].reset_index()
 
-    dtmg.rename(columns={"value": "x", "mean": "y", "variable": "feature", "count": "N"}, inplace=True)
+    dtmg.rename(columns={"value": "x", "mean": "y",
+                         "variable": "feature", "count": "N"}, inplace=True)
     dtmg["type"] = "measured"
 
     # transform to logit scale
@@ -101,13 +105,16 @@ if __name__ == "__main__":
     train, test = data.data(**param2["data"])
 
     # create long-format df
-    df_pos = pd.DataFrame({k: v.reshape((-1)) for k, v in train[0].items() if k in pos_features})
+    df_pos = pd.DataFrame({k: v.reshape((-1))
+                           for k, v in train[0].items() if k in pos_features})
     df_pos["y"] = y_pred.reshape((-1))
 
     # melt into the appropriate form
     dtm2 = pd.melt(df_pos, id_vars="y", value_vars=pos_features)
-    dtmg2 = dtm2.groupby(["variable", "value"]).agg([np.mean, "count"])["y"].reset_index()
-    dtmg2.rename(columns={"value": "x", "mean": "y", "variable": "feature", "count": "N"}, inplace=True)
+    dtmg2 = dtm2.groupby(["variable", "value"]).agg(
+        [np.mean, "count"])["y"].reset_index()
+    dtmg2.rename(columns={"value": "x", "mean": "y",
+                          "variable": "feature", "count": "N"}, inplace=True)
     dtmg2["type"] = "predicted"
 
     # Back to logit scale

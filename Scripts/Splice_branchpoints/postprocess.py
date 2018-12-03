@@ -22,6 +22,7 @@ import keras.callbacks as kc
 import data
 import model
 from helper import *
+from ..Eclip.precictive_models.mongodb_setup import host, port
 import seaborn
 import seaborn as sns
 import concise.eval_metrics as cem
@@ -31,15 +32,13 @@ DB_NAME = "Concise__Splice_branchpoints"
 DATA_DIR = os.path.expanduser("~/projects-work/deepcis/data/")
 EXP_DIR = DATA_DIR + "/Splice_branchpoints/"
 
-HOST = "ouga03"
-
 all_trials_names = [["deep_gam", "model_deep"],
                     ["deep_relu", "model_deep_position=relu_scaled"],
                     ["shallow_gam", "model_shallow2"],
                     ["shallow_relu", "model_shallow_position=relu_scaled"],
                     ]
 
-all_trials = [[k, CMongoTrials(DB_NAME, v, ip=HOST, kill_timeout=30 * 60)]
+all_trials = [[k, CMongoTrials(DB_NAME, v, ip=host, kill_timeout=30 * 60, port=port)]
               for k, v in all_trials_names]
 
 N_top_tids = 100
