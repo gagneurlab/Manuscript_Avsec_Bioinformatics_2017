@@ -12,6 +12,7 @@ import os
 import data
 import model
 from joblib import Parallel, delayed
+from .mongodb_setup import host, port
 import argparse
 from concise.hyopt import CompileFN, CMongoTrials, test_fn
 
@@ -38,7 +39,6 @@ RBP_ALL = [os.path.basename(x).replace(".csv", "")
 RUN_TEST = False
 
 DB_NAME = "RBP__Eclip"
-HOST = "ouga03"
 POS_FEATURES = ['tss', 'polya', 'exon_intron', 'intron_exon', 'start_codon',
                 'stop_codon', 'gene_start', 'gene_end']
 
@@ -64,8 +64,10 @@ class RunFN():
         fn.exp_name = c_exp_name
         print_exp(c_exp_name)
         # run
-        trials = CMongoTrials(self.db_name, c_exp_name, kill_timeout=KILL_TIMEOUT)
-        best = fmin(fn, c_hyper_params, trials=trials, algo=tpe.suggest, max_evals=self.max_evals)
+        trials = CMongoTrials(self.db_name, c_exp_name,
+                              kill_timeout=KILL_TIMEOUT, port=port)
+        best = fmin(fn, c_hyper_params, trials=trials,
+                    algo=tpe.suggest, max_evals=self.max_evals)
         print("best_parameters: " + str(best))
 
 
@@ -94,7 +96,8 @@ def run_DeepNN_trials(exp_name, fn, hyper_params,
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description="run hyper-parameter optimization")
+    parser = argparse.ArgumentParser(
+        description="run hyper-parameter optimization")
     parser.add_argument('--notest', action='store_true')
     args = parser.parse_args()
 

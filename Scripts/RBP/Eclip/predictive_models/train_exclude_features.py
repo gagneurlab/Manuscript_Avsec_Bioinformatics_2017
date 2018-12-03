@@ -10,7 +10,8 @@ from concise.utils.helper import write_json
 from concise.hyopt import (CMongoTrials, _train_and_eval_single,
                            get_model, get_data)
 # project code
-from train_all import HOST, DB_NAME, PROC_DIR, POS_FEATURES, DIR_ROOT
+from train_all import DB_NAME, PROC_DIR, POS_FEATURES, DIR_ROOT
+from .mongodb_setup import host, port
 from helper import get_logger
 import data
 import model
@@ -40,7 +41,8 @@ def get_path(dir_name, file_format, args):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Run a program by excluding features")
+    parser = argparse.ArgumentParser(
+        description="Run a program by excluding features")
     parser.add_argument("--rbp", help="Which rbp to use (say UPF1)")
     parser.add_argument("--feature_set",
                         help="Feature set to exclude, separate by ','")
@@ -71,7 +73,7 @@ if __name__ == "__main__":
     c_exp_name = args.exp + "_" + args.rbp
     logger.info("c_exp_name: {0}".format(c_exp_name))
 
-    tr = CMongoTrials(DB_NAME, c_exp_name, ip=HOST)
+    tr = CMongoTrials(DB_NAME, c_exp_name, ip=host, port=port)
     tid = tr.best_trial_tid()
     best_param = tr.get_param(tid)
 
@@ -88,14 +90,17 @@ if __name__ == "__main__":
     callbacks = [EarlyStopping(monitor=best_param["fit"]["early_stop_monitor"],
                                patience=best_param["fit"]["patience"]),
                  ModelCheckpoint(model_path,
-                                 monitor=best_param["fit"]["early_stop_monitor"],
+                                 monitor=best_param["fit"][
+                                     "early_stop_monitor"],
                                  save_best_only=True)]
 
     logger.info("Train and eval the model on the validation set")
     eval_valid_metrics, history = _train_and_eval_single(train, valid,
                                                          model=m,
-                                                         batch_size=best_param["fit"]["batch_size"],
-                                                         epochs=best_param["fit"]["epochs"],
+                                                         batch_size=best_param[
+                                                             "fit"]["batch_size"],
+                                                         epochs=best_param[
+                                                             "fit"]["epochs"],
                                                          use_weight=False,
                                                          callbacks=callbacks,
                                                          eval_best=True,
@@ -109,7 +114,8 @@ if __name__ == "__main__":
     y_true = test[1]
 
     logger.info("evaluate the test accuracy")
-    eval_test_metrics = {k: v(y_true, y_pred) for k, v in add_eval_metrics.items()}
+    eval_test_metrics = {k: v(y_true, y_pred)
+                         for k, v in add_eval_metrics.items()}
 
     logger.info("Save the test-predictions")
     dt_pred = pd.DataFrame({"y_true": y_true.reshape((-1,)),

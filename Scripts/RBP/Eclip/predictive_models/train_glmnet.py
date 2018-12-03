@@ -19,7 +19,7 @@ import argparse
 from joblib import Parallel, delayed
 
 
-from train_all import HOST, DB_NAME, PROC_DIR, POS_FEATURES, DIR_ROOT, RBP_ALL
+from train_all import DB_NAME, PROC_DIR, POS_FEATURES, DIR_ROOT, RBP_ALL
 
 
 from joblib import Memory
@@ -42,7 +42,8 @@ def data_kmer(rbp_name,
     """
     pos_class_weight: positive class weight
     """
-    dt_train, dt_valid, dt_test = data.data_split(rbp_name + "_extended", valid_chr, test_chr)
+    dt_train, dt_valid, dt_test = data.data_split(
+        rbp_name + "_extended", valid_chr, test_chr)
 
     # merge train and valid
     dt_train = pd.concat([dt_train, dt_valid])
@@ -52,11 +53,14 @@ def data_kmer(rbp_name,
     seq_test = kmer_count(dt_test.seq.tolist(), kmer)
 
     # y
-    y_train = dt_train.binding_site.as_matrix().reshape((-1, 1)).astype("float")[:, 0]
-    y_test = dt_test.binding_site.as_matrix().reshape((-1, 1)).astype("float")[:, 0]
+    y_train = dt_train.binding_site.as_matrix().reshape(
+        (-1, 1)).astype("float")[:, 0]
+    y_test = dt_test.binding_site.as_matrix().reshape(
+        (-1, 1)).astype("float")[:, 0]
 
     if n_bases is not None:
-        # impute missing values (not part of the pipeline as the Imputer lacks inverse_transform method)
+        # impute missing values (not part of the pipeline as the Imputer lacks
+        # inverse_transform method)
         imp = Imputer(strategy="median")
         imp.fit(dt_train[pos_features])
         dt_train[pos_features] = imp.transform(dt_train[pos_features])
@@ -89,7 +93,8 @@ def data_kmer(rbp_name,
     else:
         st = None
         preproc_pipeline = None
-        (x_train, y_train), (x_test, y_test) = (np.array(seq_train), np.array(y_train)), (np.array(seq_test), np.array(y_test))
+        (x_train, y_train), (x_test, y_test) = (np.array(seq_train),
+                                                np.array(y_train)), (np.array(seq_test), np.array(y_test))
 
     # min-max scale everything
     scaler = MinMaxScaler()
@@ -103,8 +108,10 @@ def data_kmer(rbp_name,
 def train_glmnet(train, test, save_path_pred, save_path_model, save_path_json, n_cores=5):
     ln = LogitNet(alpha=0.5, n_splits=10, n_jobs=n_cores)
     # to sparse
-    train_sparse = (csc_matrix(train[0]), csc_matrix(train[1].astype(np.float64).reshape((-1, 1))))
-    test_sparse = (csc_matrix(test[0]), csc_matrix(test[1].astype(np.float64).reshape((-1, 1))))
+    train_sparse = (csc_matrix(train[0]), csc_matrix(
+        train[1].astype(np.float64).reshape((-1, 1))))
+    test_sparse = (csc_matrix(test[0]), csc_matrix(
+        test[1].astype(np.float64).reshape((-1, 1))))
 
     print("train the model")
     ln.fit(train_sparse[0], train[1])
@@ -133,9 +140,12 @@ def train_kmer(protein, n_bases=None, kmer=6, n_cores=5):
 
     print("Training for protein: {0}".format(protein))
     pos_str = "seq+dist" if n_bases is None else "seq"
-    save_path_pred = os.path.join(SAVE_ROOT, "predictions", protein, "kmer_k={0}_pos={1}.csv".format(kmer, pos_str))
-    save_path_model = os.path.join(SAVE_ROOT, "models", protein, "kmer_k={0}_pos={1}.pkl".format(kmer, pos_str))
-    save_path_json = os.path.join(SAVE_ROOT, "evaluation", protein, "kmer_k={0}_pos={1}.json".format(kmer, pos_str))
+    save_path_pred = os.path.join(
+        SAVE_ROOT, "predictions", protein, "kmer_k={0}_pos={1}.csv".format(kmer, pos_str))
+    save_path_model = os.path.join(
+        SAVE_ROOT, "models", protein, "kmer_k={0}_pos={1}.pkl".format(kmer, pos_str))
+    save_path_json = os.path.join(
+        SAVE_ROOT, "evaluation", protein, "kmer_k={0}_pos={1}.json".format(kmer, pos_str))
 
     print("save_path_json: " + save_path_json)
     os.makedirs(os.path.dirname(save_path_pred), exist_ok=True)
@@ -144,13 +154,15 @@ def train_kmer(protein, n_bases=None, kmer=6, n_cores=5):
 
     train, test = data_kmer(protein, n_bases, kmer)
 
-    train_glmnet(train, test, save_path_pred, save_path_model, save_path_json, n_cores)
+    train_glmnet(train, test, save_path_pred,
+                 save_path_model, save_path_json, n_cores)
     return True
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run glmnet model")
-    parser.add_argument("--n_cores_cv", type=int, default=10, help="Number of cores")
+    parser.add_argument("--n_cores_cv", type=int,
+                        default=10, help="Number of cores")
     parser.add_argument("--n_jobs", type=int, default=1, help="Number of jobs")
     parser.add_argument("--kmer", type=int, default=6, help="k in k-mer")
     args = parser.parse_args()
