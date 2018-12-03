@@ -64,7 +64,7 @@ class RunFN():
         fn.exp_name = c_exp_name
         print_exp(c_exp_name)
         # run
-        trials = CMongoTrials(self.db_name, ip=host, c_exp_name,
+        trials = CMongoTrials(self.db_name, c_exp_name,  ip=host,
                               kill_timeout=KILL_TIMEOUT, port=port)
         best = fmin(fn, c_hyper_params, trials=trials,
                     algo=tpe.suggest, max_evals=self.max_evals)
