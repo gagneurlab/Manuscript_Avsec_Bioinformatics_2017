@@ -2,7 +2,7 @@ numpy
 pandas
 sklearn
 keras>=2.0
-concise==0.6.0.0
+concise
 tensorflow
 snakemake
 joblib
