@@ -67,6 +67,8 @@ metadata_path = "{raw_path}/metadata.tsv".format(raw_path=raw_path)
 metadata_url = "https://github.com/gagneurlab/Manuscript_Avsec_Bioinformatics_2017/files/2447032/metadata.tsv.zip"
 fasta_url = "https://ftp.ensembl.org/pub/release-94/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.toplevel.fa.gz"
 annotations_url = "https://github.com/gagneurlab/Manuscript_Avsec_Bioinformatics_2017/files/2484555/gencode.v25.annotation.gtf.zip"
+expected_annotation_path = "{fasta_path}/gencode.v25.annotation.gtf.rds".format(
+    fasta_path=fasta_path)
 target_partial_fasta = "{fasta_path}/GRCh38.p7.genome.partial.fa".format(
     fasta_path=fasta_path)
 target_fasta = "{fasta_path}/GRCh38.p7.genome.fa".format(fasta_path=fasta_path)
@@ -147,7 +149,7 @@ if os.path.exists(metadata_path):
 downloader((raw_path, metadata_url), multithread=False)
 
 
-if not os.path.exists(target_fasta):
+if not os.path.exists(target_partial_fasta):
     print("Downloading and extracting human genome fasta.")
     Path(fasta_path).mkdir(parents=True, exist_ok=True)
     downloader((fasta_path, fasta_url), multithread=False)
@@ -169,7 +171,7 @@ if not os.path.exists(target_fasta):
     print("Deleting big fasta")
     os.remove(target_partial_fasta)
 
-if not os.path.exists(fasta_path):
+if not os.path.exists(expected_annotation_path):
     print("Downloading genome annotations.")
     downloader((fasta_path, annotations_url), multithread=False)
 
