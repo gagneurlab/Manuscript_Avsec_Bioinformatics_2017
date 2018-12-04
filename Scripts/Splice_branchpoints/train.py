@@ -28,6 +28,7 @@ fn = CompileFN(DB_NAME, exp_name,
                loss_metric="auprc",
                loss_metric_mode="max",
                use_tensorboard=False,
+               save_dir="hyperopt_train_all",
                valid_split=0.2,
                random_state=100)
 
@@ -76,6 +77,7 @@ fn = CompileFN(DB_NAME, exp_name,
                loss_metric="auprc",
                loss_metric_mode="max",
                use_tensorboard=False,
+               save_dir="hyperopt_train_all",
                valid_split=0.2,
                random_state=100)
 
@@ -125,6 +127,7 @@ fn = CompileFN(DB_NAME, exp_name,
                loss_metric="auprc",
                loss_metric_mode="max",
                use_tensorboard=False,
+               save_dir="hyperopt_train_all",
                valid_split=0.2,
                random_state=100)
 
@@ -173,6 +176,7 @@ fn = CompileFN(DB_NAME, exp_name,
                loss_metric="auprc",
                loss_metric_mode="max",
                use_tensorboard=False,
+               save_dir="hyperopt_train_all",
                valid_split=0.2,
                random_state=100)
 
@@ -222,6 +226,7 @@ fn = CompileFN(DB_NAME, exp_name,
                loss_metric="auprc",
                loss_metric_mode="max",
                use_tensorboard=False,
+               save_dir="hyperopt_train_all",
                valid_split=0.2,
                random_state=100)
 
@@ -274,6 +279,7 @@ fn = CompileFN(DB_NAME, exp_name,
                loss_metric="auprc",
                loss_metric_mode="max",
                use_tensorboard=False,
+               save_dir="hyperopt_train_all",
                valid_split=0.2,
                random_state=100)
 

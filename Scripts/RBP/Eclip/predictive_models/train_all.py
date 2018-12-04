@@ -116,6 +116,7 @@ if __name__ == "__main__":
                    add_eval_metrics=["auprc", "auc"],
                    loss_metric="auprc",
                    loss_metric_mode="max",
+                   save_dir="hyperopt_train_all",
                    valid_split=None)  # use it from the data.data
 
     hyper_params = {
