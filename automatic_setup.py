@@ -134,6 +134,7 @@ def clear_directory_chromosomes(directory: str, target: str = "chrUn_"):
             target) for file in tqdm(next(os.walk(directory))[2]) if file.endswith(".tab")
     ]
 
+
 print("Cleaning tab files.")
 clear_directory_chromosomes(raw_path)
 
@@ -171,4 +172,9 @@ if not os.path.exists(fasta_path):
     downloader((fasta_path, annotations_url), multithread=False)
 
 
-print("You should now be able to run snakemake.")
+print("Ok, now you can generate the data!")
+print("First, go to the following directory: \n")
+print("\033[1m cd  {path}/Scripts/RBP/Eclip \033[0m\n".format(path=path))
+input("Press any key to proceed further...")
+print("Now you can execute snakemake:\n")
+print("\033[1m cd  snakemake --cores=12 \033[0m\n".format(path=path))
