@@ -167,6 +167,7 @@ if not os.path.exists(target_partial_fasta):
             f_out.write(line)
             line = f_in.readline()
             pbar.update()
+        pbar.close()
 
     print("Deleting big fasta")
     os.remove(target_partial_fasta)
