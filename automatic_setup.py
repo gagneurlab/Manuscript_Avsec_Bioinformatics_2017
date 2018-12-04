@@ -144,30 +144,31 @@ if os.path.exists(metadata_path):
 downloader((raw_path, metadata_url), multithread=False)
 
 
-print("Downloading and extracting human genome fasta.")
-Path(fasta_path).mkdir(parents=True, exist_ok=True)
-downloader((fasta_path, fasta_url), multithread=False)
+if not os.path.exists(target_fasta):
+    print("Downloading and extracting human genome fasta.")
+    Path(fasta_path).mkdir(parents=True, exist_ok=True)
+    downloader((fasta_path, fasta_url), multithread=False)
 
+    shutil.move("{fasta_path}/{expected_fasta_name}".format(
+        fasta_path=fasta_path,
+        expected_fasta_name=".".join(fasta_url.split("/")[-1].split(".")[:-1])
+    ), target_partial_fasta)
 
-shutil.move("{fasta_path}/{expected_fasta_name}".format(
-    fasta_path=fasta_path,
-    expected_fasta_name=".".join(fasta_url.split("/")[-1].split(".")[:-1])
-), target_partial_fasta)
-
-print("Removing unused genes from fasta")
-with open(target_partial_fasta, "r") as f_in, open(target_fasta, "w") as f_out:
-    line = f_in.readline()
-    pbar = tqdm()
-    while not line.startswith(">MT dna"):
-        f_out.write(line)
+    print("Removing unused genes from fasta")
+    with open(target_partial_fasta, "r") as f_in, open(target_fasta, "w") as f_out:
         line = f_in.readline()
-        pbar.update()
+        pbar = tqdm()
+        while not line.startswith(">MT dna"):
+            f_out.write(line)
+            line = f_in.readline()
+            pbar.update()
 
-print("Deleting big fasta")
-os.remove(target_partial_fasta)
+    print("Deleting big fasta")
+    os.remove(target_partial_fasta)
 
-print("Downloading genome annotations.")
-downloader((fasta_path, annotations_url), multithread=False)
+if not os.path.exists(fasta_path):
+    print("Downloading genome annotations.")
+    downloader((fasta_path, annotations_url), multithread=False)
 
 
 print("You should now be able to run snakemake.")
