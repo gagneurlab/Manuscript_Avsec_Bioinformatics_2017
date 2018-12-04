@@ -180,4 +180,4 @@ print("\033[1m cd  {path}/Scripts/RBP/Eclip \033[0m\n".format(path=path))
 input("Press any key to proceed further...")
 print("Now you can execute snakemake:\n")
 print(
-    "\033[1m cd  snakemake --cores={cores} \033[0m\n".format(cores=cpu_count()))
+    "\033[1m snakemake --cores={cores} \033[0m\n".format(cores=cpu_count()))
