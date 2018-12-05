@@ -5,7 +5,7 @@ from hyperopt import fmin, tpe, hp, pyll
 from concise.hyopt import CompileFN, CMongoTrials, test_fn
 from copy import deepcopy
 import numpy as np
-
+from ..Eclip.precictive_models.mongodb_setup import host, port
 import data
 import model
 
@@ -28,6 +28,7 @@ fn = CompileFN(DB_NAME, exp_name,
                loss_metric="auprc",
                loss_metric_mode="max",
                use_tensorboard=False,
+               save_dir="hyperopt_train_all",
                valid_split=0.2,
                random_state=100)
 
@@ -61,7 +62,7 @@ hyper_params = {
 }
 
 # test_fn(fn, hyper_params, n_train=1000)
-trials = CMongoTrials(DB_NAME, exp_name, kill_timeout=30 * 60)
+trials = CMongoTrials(DB_NAME, ip=host, exp_name, kill_timeout=30 * 60)
 best = fmin(fn, hyper_params, trials=trials, algo=tpe.suggest, max_evals=1000)
 print("best_parameters: " + str(best))
 
@@ -76,6 +77,7 @@ fn = CompileFN(DB_NAME, exp_name,
                loss_metric="auprc",
                loss_metric_mode="max",
                use_tensorboard=False,
+               save_dir="hyperopt_train_all",
                valid_split=0.2,
                random_state=100)
 
@@ -110,7 +112,7 @@ hyper_params = {
 }
 
 # test_fn(fn, hyper_params, n_train=1000)
-trials = CMongoTrials(DB_NAME, exp_name, kill_timeout=30 * 60)
+trials = CMongoTrials(DB_NAME, ip=host, exp_name, kill_timeout=30 * 60)
 best = fmin(fn, hyper_params, trials=trials, algo=tpe.suggest, max_evals=200)
 print("best_parameters: " + str(best))
 
@@ -125,6 +127,7 @@ fn = CompileFN(DB_NAME, exp_name,
                loss_metric="auprc",
                loss_metric_mode="max",
                use_tensorboard=False,
+               save_dir="hyperopt_train_all",
                valid_split=0.2,
                random_state=100)
 
@@ -159,7 +162,7 @@ hyper_params = {
 }
 
 # test_fn(fn, hyper_params, n_train=1000)
-trials = CMongoTrials(DB_NAME, exp_name, kill_timeout=30 * 60)
+trials = CMongoTrials(DB_NAME, ip=host, exp_name, kill_timeout=30 * 60)
 best = fmin(fn, hyper_params, trials=trials, algo=tpe.suggest, max_evals=200)
 print("best_parameters: " + str(best))
 # ----------------
@@ -173,6 +176,7 @@ fn = CompileFN(DB_NAME, exp_name,
                loss_metric="auprc",
                loss_metric_mode="max",
                use_tensorboard=False,
+               save_dir="hyperopt_train_all",
                valid_split=0.2,
                random_state=100)
 
@@ -208,7 +212,7 @@ hyper_params = {
 }
 
 # test_fn(fn, hyper_params, n_train=1000)
-trials = CMongoTrials(DB_NAME, exp_name, kill_timeout=30 * 60)
+trials = CMongoTrials(DB_NAME, ip=host, exp_name, kill_timeout=30 * 60)
 best = fmin(fn, hyper_params, trials=trials, algo=tpe.suggest, max_evals=200)
 print("best_parameters: " + str(best))
 # ----------------
@@ -222,6 +226,7 @@ fn = CompileFN(DB_NAME, exp_name,
                loss_metric="auprc",
                loss_metric_mode="max",
                use_tensorboard=False,
+               save_dir="hyperopt_train_all",
                valid_split=0.2,
                random_state=100)
 
@@ -259,7 +264,7 @@ hyper_params = {
 }
 
 # test_fn(fn, hyper_params, n_train=1000)
-trials = CMongoTrials(DB_NAME, exp_name, kill_timeout=30 * 60)
+trials = CMongoTrials(DB_NAME, ip=host, exp_name, kill_timeout=30 * 60)
 best = fmin(fn, hyper_params, trials=trials, algo=tpe.suggest, max_evals=1000)
 print("best_parameters: " + str(best))
 
@@ -274,6 +279,7 @@ fn = CompileFN(DB_NAME, exp_name,
                loss_metric="auprc",
                loss_metric_mode="max",
                use_tensorboard=False,
+               save_dir="hyperopt_train_all",
                valid_split=0.2,
                random_state=100)
 
@@ -296,6 +302,6 @@ hyper_params = {
 }
 
 test_fn(fn, hyper_params, n_train=1000)
-trials = CMongoTrials(DB_NAME, exp_name, kill_timeout=30 * 60)
+trials = CMongoTrials(DB_NAME, ip=host, exp_name, kill_timeout=30 * 60)
 best = fmin(fn, hyper_params, trials=trials, algo=tpe.suggest, max_evals=1000)
 print("best_parameters: " + str(best))

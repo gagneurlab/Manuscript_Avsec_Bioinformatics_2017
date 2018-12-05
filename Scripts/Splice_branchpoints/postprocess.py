@@ -5,6 +5,7 @@
 - get validation accuracies
 """
 import os
+import matplotlib
 import matplotlib.pyplot as plt
 from concise.hyopt import CompileFN, CMongoTrials, test_fn
 import numpy as np
@@ -21,6 +22,7 @@ import keras.callbacks as kc
 import data
 import model
 from helper import *
+from ..Eclip.precictive_models.mongodb_setup import host, port
 import seaborn
 import seaborn as sns
 import concise.eval_metrics as cem
@@ -30,15 +32,13 @@ DB_NAME = "Concise__Splice_branchpoints"
 DATA_DIR = os.path.expanduser("~/projects-work/deepcis/data/")
 EXP_DIR = DATA_DIR + "/Splice_branchpoints/"
 
-HOST = "ouga03"
-
 all_trials_names = [["deep_gam", "model_deep"],
                     ["deep_relu", "model_deep_position=relu_scaled"],
                     ["shallow_gam", "model_shallow2"],
                     ["shallow_relu", "model_shallow_position=relu_scaled"],
                     ]
 
-all_trials = [[k, CMongoTrials(DB_NAME, v, ip=HOST, kill_timeout=30 * 60)]
+all_trials = [[k, CMongoTrials(DB_NAME, v, ip=host, kill_timeout=30 * 60, port=port)]
               for k, v in all_trials_names]
 
 N_top_tids = 100
@@ -80,11 +80,13 @@ for name, trials, attr in tqdm(all_trials):
 
         y_pred = m.predict(d["test"][0])
         y_true = d["test"][1]
-        dt_pred = pd.DataFrame({"y_true": y_true.reshape((-1,)), "y_pred": y_pred.reshape((-1,))})
+        dt_pred = pd.DataFrame({"y_true": y_true.reshape(
+            (-1,)), "y_pred": y_pred.reshape((-1,))})
         dt_pred = dt_pred[dt_pred["y_true"] != -1]
         dt_pred["y_true"] = np.where(dt_pred["y_true"] == 1, "HC", "NEG")
         dt_pred.sort_values("y_pred")
-        dt_pred.to_csv(EXP_DIR + "/test_predictions/{0}_{1}.csv".format(name, i), index=False)
+        dt_pred.to_csv(
+            EXP_DIR + "/test_predictions/{0}_{1}.csv".format(name, i), index=False)
 
 # get loss history
 df_hist = pd.concat([trials.train_history(tid).assign(trial=name)
@@ -107,5 +109,3 @@ df_hist.to_csv(EXP_DIR + "/trials/train_history/gam_vs_relu.csv")
 
 # df.groupby("name").apply(lambda a: cem.auc(a.y_true != "NEG", a.y_pred))
 # df.groupby("name").apply(lambda a: cem.auprc(a.y_true != "NEG", a.y_pred))
-
-

@@ -19,6 +19,6 @@ export PYTHONPATH=${THIS_DIR}
 
 # run the worker
 hyperopt-mongo-worker \
-    --mongo=${MONGO_IP}:1234/$DB \
+    --mongo=${MONGO_IP}:27017/$DB \
     --poll-interval=1 \
     --reserve-timeout=3600

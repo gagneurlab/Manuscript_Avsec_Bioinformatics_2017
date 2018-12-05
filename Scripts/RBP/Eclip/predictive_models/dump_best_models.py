@@ -11,7 +11,8 @@ from shutil import copyfile
 from glob import glob
 from concise.hyopt import CMongoTrials, get_data
 import os
-from train_all import DIR_ROOT, PROC_DIR, RBP_LIST, RBP_ALL, DB_NAME, HOST
+from train_all import DIR_ROOT, PROC_DIR, RBP_LIST, RBP_ALL, DB_NAME
+from mongodb_setup import host, port
 import logging
 import argparse
 from pprint import pprint
@@ -21,12 +22,13 @@ from joblib import Memory, Parallel, delayed
 
 memory = Memory(cachedir=data.CACHE_DIR, verbose=0)
 
+
 def print_exp(exp_name, rbp):
     print("-" * 40 + "\nexp: {0}; rbp: {1}".format(exp_name, rbp))
 
 
 def get_trials(exp_name, rbp):
-    return CMongoTrials(DB_NAME, exp_name + "_" + rbp, ip=HOST)
+    return CMongoTrials(DB_NAME, exp_name + "_" + rbp, ip=host, port=port)
 
 
 def get_models_overall(exp_name, rbp, ignore_cache=False):

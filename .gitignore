@@ -34,3 +34,5 @@ Scripts/**/*.html
 localdata/
 **/logs*/*
 data
+
+\.DS_Store

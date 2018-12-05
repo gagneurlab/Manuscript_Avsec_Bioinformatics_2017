@@ -1,5 +1,7 @@
 import sklearn.metrics as skm
 import concise.eval_metrics as cem
+import matplotlib
+matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd

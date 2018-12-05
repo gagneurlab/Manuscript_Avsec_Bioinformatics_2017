@@ -9,6 +9,7 @@
 ## ----
 ## number of times more negative examples to generate than positive sequences
 print("start")
+options(warn=1)
 N_TIMES_NEGATIVE <- 4
 SEQUENCE_LENGTH <- 101
 ## ----
@@ -30,6 +31,7 @@ grlist_by_protein <- sapply(mdata[, unique(protein)],
                               sapply(cell_lines, function(cl) {
                                 grlist[mdata[prot == protein & sample == cl, file]] 
                               }, simplify = FALSE), simplify = FALSE)
+
 # intersect for replicates, append for different cell-lines
 protein_peak_overlaps <- pblapply(grlist_by_protein, . %>% lapply(intersect_center)
                                   %>% gr_rbindlist(idcol="sample")) %>% gr_rbindlist(idcol="protein")

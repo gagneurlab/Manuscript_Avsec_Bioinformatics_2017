@@ -10,7 +10,8 @@ import data
 from glob import glob
 from concise.hyopt import CMongoTrials, get_data
 import os
-from train_all import DIR_ROOT, PROC_DIR, RBP_LIST, RBP_ALL, RBP_rerun, DB_NAME, HOST
+from train_all import DIR_ROOT, PROC_DIR, RBP_LIST, RBP_ALL, RBP_rerun, DB_NAME
+from mongodb_setup import host, port
 import logging
 import argparse
 from pprint import pprint
@@ -26,14 +27,15 @@ def print_exp(exp_name, rbp):
 
 
 def get_trials(exp_name, rbp):
-    return CMongoTrials(DB_NAME, exp_name + "_" + rbp, ip=HOST)
+    return CMongoTrials(DB_NAME, exp_name + "_" + rbp, ip=host, port=port)
 
 
 def get_predictions_overall(exp_name, rbp, ignore_cache=False):
     # the following function is cached if for the same experiment,
     # the same tid is the best one
     save_predictions_cached(exp_name, rbp,
-                            best_tid=get_trials(exp_name, rbp).best_trial_tid(),
+                            best_tid=get_trials(
+                                exp_name, rbp).best_trial_tid(),
                             ignore_cache=ignore_cache)
 
 
@@ -42,7 +44,8 @@ def save_predictions_cached(exp_name, rbp, best_tid, ignore_cache=False):
     data_fn = data.data_extended_cached
     print_exp(exp_name, rbp)
 
-    basedir = "{root}/processed/predictions/{rbp}/".format(root=DIR_ROOT, rbp=rbp)
+    basedir = "{root}/processed/predictions/{rbp}/".format(
+        root=DIR_ROOT, rbp=rbp)
     out_csv = basedir + "{method}.csv".format(method=exp_name)
     if not os.path.exists(basedir):
         os.makedirs(basedir)
