@@ -19,6 +19,7 @@ assert len(RBPS) in [112, 150]  # support either the new or the old version
 
 RBP_SUBSET = ["UPF1", "PUM2", "DDX3X", "NKRF", "TARDBP", "SUGP2"]
 
+
 TRAIN_TYPES = ["train", "valid", "test"]
 POSNEG = ["pos", "neg"]
 PROC_DIR = "data/eclip/processed"
@@ -28,6 +29,10 @@ POS_FEATURES = ['tss', 'polya', 'exon_intron', 'intron_exon', 'start_codon',
                 'stop_codon', 'gene_start', 'gene_end']
 POS_FEATURES_comb = ["tss,gene_start", "polya,gene_end"]
 # --------------------------------------------
+# 1. snakemake   # this will produce all the files for rule all
+# 2. Train the models...
+# 3. Run snakemake get_train_exclude_features
+
 rule all:
     input:
         "data/eclip/processed/peak_center-gene_mapping_with_sequence.rds",
@@ -38,6 +43,9 @@ rule all:
                rbp_name=RBP_SUBSET),
         expand(BASE_DM + "/{train_types}/{rbp_name}_extended.csv",
                rbp_name=RBPS, train_types=TRAIN_TYPES),
+
+rule get_train_exclude_features:
+    input:
         expand(PROC_DIR + "/feature_exclusion_exp/results/{rbp_name}/{exp}-excl-{fset}.json",
                rbp_name=RBPS[:2],
                exp=["DeepNN_scalar_position_ext_gam"],
